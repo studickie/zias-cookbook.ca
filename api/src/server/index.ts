@@ -45,14 +45,9 @@ async function main() {
         //* Configure middleware
 
         // CORS
-        const requestOrigin = process.env.CORS_REQUEST_ORIGIN || '*';
+        //const requestOrigin = process.env.CORS_REQUEST_ORIGIN || '*';
     
-        app.use(cors({ 
-            methods: 'GET, POST, PUT, DELETE',
-            origin: requestOrigin,
-            optionsSuccessStatus: 200,
-            preflightContinue: false
-        }));
+        app.use(cors());
 
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));

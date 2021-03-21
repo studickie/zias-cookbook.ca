@@ -18,7 +18,7 @@ export default function useGoogleOAuth(): void {
     const requestSignIn = async (googleUser: gapi.auth2.GoogleUser): Promise<void> => {
         try {
             const authResponse = googleUser.getAuthResponse(true).id_token;
-
+            console.log('authResponse', authResponse);
             const response = requestGoogleSignin(authResponse);
 
             console.log('server response', response);

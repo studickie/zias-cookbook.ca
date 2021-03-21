@@ -4,8 +4,6 @@ import LoginPage from './pages/LoginPage';
 
 export default function App() {
 
-  useGoogleOAuth();
-
   return (
     <div className="App">
       <header className="App-header">
