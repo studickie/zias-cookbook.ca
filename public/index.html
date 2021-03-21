@@ -5,18 +5,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id"
-        content="334487151393-2mmjdmfao1602jgm37pcrucrfhemk7un.apps.googleusercontent.com">
+    <!-- <meta name="google-signin-client_id"
+        content="334487151393-2mmjdmfao1602jgm37pcrucrfhemk7un.apps.googleusercontent.com"> -->
 
     <title>Google OAuth</title>
 </head>
 
 <body>
-    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <!-- <div class="g-signin2" data-onsuccess="onSignIn"></div> -->
 
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <!-- <script src="https://apis.google.com/js/platform.js" async defer></script> -->
 
-    <script>
+    <!-- <script>
         function onSignIn(googleUser) {
             var profile = googleUser.getBasicProfile();
 
@@ -42,6 +42,22 @@
                     console.log('data', data);
                 });
         }
+    </script> -->
+
+    <script>
+        function makeTestRequest () {
+            console.log('Test request - START')
+
+            fetch('https://dev.zias-cookbook.ca/api', {
+                    method: 'GET'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('response', data);
+                });
+        }
+
+        makeTestRequest();
     </script>
 </body>
 

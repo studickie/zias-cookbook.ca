@@ -1,18 +1,18 @@
 const API_URL = process.env.REACT_APP_API_URL;
 
-export async function requestZCTest (): Promise<Response> {
-    const response = await fetch(`${API_URL}`, {
-        method: 'GET',
-        credentials: 'include'
+export function requestZCTest (): unknown {
+    return fetch(`${API_URL}`, {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('response data', data);
     });
-
-    return await response.json();
 }
 
 export async function requestGoogleSignin (googleToken: any): Promise<Response> {
     const response = await fetch(`${API_URL}/auth/google_signin`, {
         method: 'POST',
-        credentials: 'include',
         headers: {
             'Content-type': 'application/json'
         },

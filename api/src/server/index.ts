@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import useError from './middleware/useError';
 import authRoutes from './routes/authRoute';
 import rootRoutes from './routes/rootRoute';
