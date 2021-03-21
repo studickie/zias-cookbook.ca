@@ -1,7 +1,7 @@
-const DOMAIN_URL = process.env.REACT_APP_DOMAIN_URL;
+const API_URL = process.env.REACT_APP_API_URL;
 
 export async function requestZCTest (): Promise<Response> {
-    const response = await fetch(`${DOMAIN_URL}/api`, {
+    const response = await fetch(`${API_URL}`, {
         method: 'GET'
     });
 
@@ -9,7 +9,7 @@ export async function requestZCTest (): Promise<Response> {
 }
 
 export async function requestGoogleSignin (googleToken: any): Promise<Response> {
-    const response = await fetch(`${DOMAIN_URL}/api/auth/google_signin`, {
+    const response = await fetch(`${API_URL}/auth/google_signin`, {
         method: 'POST',
         headers: {
             'Content-type': 'application/json'

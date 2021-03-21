@@ -47,7 +47,7 @@ async function main() {
         // CORS
         //const requestOrigin = process.env.CORS_REQUEST_ORIGIN || '*';
     
-        app.use(cors());
+        //app.use(cors());
 
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
