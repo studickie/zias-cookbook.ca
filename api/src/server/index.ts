@@ -44,13 +44,6 @@ async function main() {
         
         //* Configure middleware
 
-        // CORS
-        //const requestOrigin = process.env.CORS_REQUEST_ORIGIN || '*';
-    
-        app.use(cors({
-            origin: '*'
-        }));
-        app.options('*', cors);
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
 
