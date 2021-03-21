@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import useError from './middleware/useError';
 import authRoutes from './routes/authRoute';
 import rootRoutes from './routes/rootRoute';
@@ -10,6 +11,8 @@ import googleService from '../google';
 
 async function main() {
     try {
+        const nodeEnv = process.env.NODE_ENV || 'production';
+
         const dbHost = process.env.DB_HOST || '';
         const dbName = process.env.DB_NAME || '';
         const dbUser = process.env.DB_USER || '';
@@ -40,6 +43,17 @@ async function main() {
         const app = express();
         
         //* Configure middleware
+
+        // CORS
+        const requestOrigin = process.env.CORS_REQUEST_ORIGIN || '*';
+    
+        app.use(cors({ 
+            methods: 'GET, POST, PUT, DELETE',
+            origin: requestOrigin,
+            optionsSuccessStatus: 200,
+            preflightContinue: false
+        }));
+
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
 

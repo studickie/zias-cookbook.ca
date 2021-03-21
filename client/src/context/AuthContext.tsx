@@ -1,18 +1,17 @@
 import React from 'react';
 
 interface AuthState {
-    isSignedIn: boolean;
+    hasAuthenticated: boolean;
 }
 
 const initialState: AuthState = {
-    isSignedIn: false
+    hasAuthenticated: false
 }
 
 const AuthStateContext = React.createContext(({} as AuthState));
 
 /**
  * Provides read access to auth state
- * @returns AuthState
  */
 export function useAuthState (): AuthState {
     const context = React.useContext(AuthStateContext);
@@ -26,12 +25,30 @@ export function useAuthState (): AuthState {
 
 type AuthDispatchAction = 
     | {
-        type: 'SET_IS_SIGNED_IN';
-        isSignedIn: boolean;
+        type: 'LOGIN_SUCCESS';
+        hasAuthenticated: boolean;
+    }
+    | {
+        type: 'LOGOUT';
+        hasAuthenticated: false;
     };
 
 function authDispatch (state: AuthState, action: AuthDispatchAction): AuthState {
     switch(action.type) {
+        case 'LOGIN_SUCCESS':
+            return {
+                ...state,
+                ...{
+                    hasAuthenticated: action.hasAuthenticated
+                }
+            }
+            case 'LOGOUT':
+            return {
+                ...state,
+                ...{
+                    hasAuthenticated: action.hasAuthenticated
+                }
+            }
         default:
             return state;
     }
@@ -43,7 +60,6 @@ const AuthStateDispatch = React.createContext(({} as  AuthDispatch));
 
 /**
  * Provides write access to auth state
- * @returns AuthDispatch
  */
 export function useAuthDispatch (): AuthDispatch {
     const dispatch = React.useContext(AuthStateDispatch);
@@ -52,19 +68,7 @@ export function useAuthDispatch (): AuthDispatch {
         throw new Error('Dispatch not provided');
     }
 
-    const mountedRef = React.useRef<boolean>(false);
-
-    React.useEffect(() => {
-        mountedRef.current = true;
-
-        return () => {
-            mountedRef.current = false
-        }
-    }, []);
-
-    return React.useCallback((...args) => {
-        return mountedRef.current && dispatch(...args)
-    }, [dispatch]);
+    return dispatch;
 }
 
 interface Props {
@@ -72,9 +76,9 @@ interface Props {
 }
 
 /**
- * Auth state context provider
+ * React Context provider for auth state
+ * 
  * @param props [children] React child node
- * @returns 
  */
 export default function AuthProvider (props: Props): JSX.Element {
     

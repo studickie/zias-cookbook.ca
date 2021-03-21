@@ -8,5 +8,6 @@ export async function requestGoogleSignin (googleToken: any): Promise<Response> 
         },
         body: JSON.stringify({ token: googleToken })
     });
+
     return await response.json();
 }
