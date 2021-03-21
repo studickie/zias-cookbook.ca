@@ -4,7 +4,7 @@ import { requestZCTest } from '../asyncHelpers/authService';
 export default function LoginPage() {
 
     React.useEffect(() => {
-        requestZCTest();
+        //requestZCTest();
       }, []);
 
     return (
