@@ -1,7 +1,9 @@
 import express from 'express';
+import cors from 'cors';
 import useError from './middleware/useError';
-import authRoutes from './routes/authRoute';
-import rootRoutes from './routes/rootRoute';
+import authRoutes from './routes/authRoutes';
+import oauthRoutes from './routes/oauth2Routes';
+import rootRoutes from './routes/rootRoutes';
 import dbConnect from '../database';
 import logEvent from '../logger';
 //import nodemailerStartup from '../mailer';
@@ -42,7 +44,7 @@ async function main() {
         const app = express();
         
         //* Configure middleware
-
+        app.use(cors());
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
 
@@ -50,6 +52,7 @@ async function main() {
         const router = express.Router();
         app.use('/', rootRoutes(router));
         app.use('/auth', authRoutes(router, { dbAccess, authToken: tokenService, google }));
+        app.use('/oauth2', oauthRoutes(router));
 
         app.use(useError);
 

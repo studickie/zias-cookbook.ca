@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { requestGoogleSignin } from '../asyncHelpers/authService';
+//import { requestGoogleSignin } from '../asyncHelpers/oauthAsync';
 import { useAuthState, useAuthDispatch } from '../context/AuthContext';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
@@ -19,9 +19,9 @@ export default function useGoogleOAuth(): void {
         try {
             const authResponse = googleUser.getAuthResponse(true).id_token;
             console.log('authResponse', authResponse);
-            const response = requestGoogleSignin(authResponse);
+            //const response = requestGoogleSignin(authResponse);
 
-            console.log('server response', response);
+            //console.log('server response', response);
             
         } catch (e) {
             console.log('Error - requestSignIn', e);

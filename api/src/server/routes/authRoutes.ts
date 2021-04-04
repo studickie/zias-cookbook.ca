@@ -51,6 +51,8 @@ export default function authRoutes (router: Router, services: Services): Router 
 
         } catch (e) {
             return next(e);
+        } finally {
+            console.log('[LOG] - /google_signin')
         }
     });
 
