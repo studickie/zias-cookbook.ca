@@ -1,11 +1,13 @@
 export interface DbUser {
     _id: string;
-    googleId: string;
+    googleId: string | null | undefined;
+    googleToken: string | null | undefined;
+    googleRef: string | null | undefined;
     createdOn: Date;
     updatedOn: Date;
 }
 
-export type DbUserAuthCredentials = Pick<DbUser, 'googleId'>;
+export type DbUserAuthCredentials = Pick<DbUser, 'googleId' | 'googleToken' | 'googleRef'>;
 
 export default class User {
 
@@ -14,6 +16,8 @@ export default class User {
 
         return {
             googleId: args.googleId,
+            googleRef: args.googleRef,
+            googleToken: args.googleToken,
             createdOn: currentDate,
             updatedOn: currentDate
         }

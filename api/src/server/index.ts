@@ -1,14 +1,17 @@
-import express from 'express';
+import express, {Request, Response, NextFunction} from 'express';
+import session from 'express-session';
+import MongoDBStore from 'connect-mongodb-session';
+const MongoStore = MongoDBStore(session);
 import cors from 'cors';
 import useError from './middleware/useError';
-import authRoutes from './routes/authRoutes';
+//import authRoutes from './routes/authRoutes';
 import oauthRoutes from './routes/oauth2Routes';
 import rootRoutes from './routes/rootRoutes';
 import dbConnect from '../database';
 import logEvent from '../logger';
 //import nodemailerStartup from '../mailer';
 import authToken from '../helpers/authToken';
-import googleService from '../google';
+import GoogleService from '../google';
 
 async function main() {
     try {
@@ -20,6 +23,11 @@ async function main() {
         const dbPass = process.env.DB_PASS || '';
 
         const dbAccess = await dbConnect(dbHost, dbName, dbUser, dbPass);
+
+        const sessionStore = new MongoStore({
+            uri: `mongodb://${dbUser}:${dbPass}@${dbHost}/${dbName}`,
+            collection: 'sessions'
+        });
 
         // Mail Service
         // const mailHost = process.env.MAIL_HOST || '';
@@ -34,25 +42,37 @@ async function main() {
 
         const tokenService = authToken(secret);
 
-        const googleClientId = process.env.GOOGLE_CLIENT_ID;
-
-        if (googleClientId === undefined) throw new Error('"googleService" is undefined');
-
-        const google = googleService(googleClientId);
+        const googleService = GoogleService();
 
         //* Framework configuration
         const app = express();
         
         //* Configure middleware
-        app.use(cors());
+
+        app.use(cors({
+            credentials: true, 
+            origin: 'http://localhost:3000'
+        }));
+        app.use(session({
+            secret: 'session!secret?',
+            cookie: {
+                maxAge: 1000 * 60 * 60,
+                httpOnly: true
+            },
+            store: sessionStore,
+            resave: false,
+            saveUninitialized: false
+        }));
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
 
         //* Configure routes
         const router = express.Router();
-        app.use('/', rootRoutes(router));
-        app.use('/auth', authRoutes(router, { dbAccess, authToken: tokenService, google }));
-        app.use('/oauth2', oauthRoutes(router));
+        app.get('/', async (req: Request, res: Response, next: NextFunction) => {
+            return res.status(200).json({ message: "Good Request?", session: req.session});
+        });
+        
+        app.use('/oauth2', oauthRoutes(router, { googleService, dbAccess }));
 
         app.use(useError);
 

@@ -4,6 +4,22 @@ import OauthCallbackPage from './pages/OauthCallbackPage/OauthCallbackPage';
 import GoogleSignIn from './components/GoogleSignin/GoogleSignin';
 
 function App(): JSX.Element {
+
+	const handleCheckSession = async () => {
+		try {
+			fetch(`${process.env.REACT_APP_API_URL}`, {
+				method: 'GET',
+				credentials: 'include'
+			})
+			.then(res => res.json())
+			.then(data => console.log('return', data));
+
+		} catch (e) {
+			console.log('[ERROR] - handleCheckSession: ', e);
+		}
+	}
+
+
 	return (
 		<div>
 			<header>
@@ -18,6 +34,11 @@ function App(): JSX.Element {
 					<RouterLink to='/login/google_callback'>Oauth</RouterLink>
 				</li>
 			</ul>
+			<div>
+				<button onClick={handleCheckSession}>
+					session check
+				</button>
+			</div>
 			<div>
 				<Switch>
 					<Route exact path='/'>

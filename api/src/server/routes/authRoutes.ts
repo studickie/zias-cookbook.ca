@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { IGoogleService } from '../../google';
 import { AccessConstructor } from '../../database';
-import Users from '../../database/repos/UsersRepo';
+import Users from '../../database/DAO/UsersDAO';
 import { IAuthToken } from '../../helpers/authToken';
 
 interface Services {
@@ -22,31 +22,31 @@ export default function authRoutes (router: Router, services: Services): Router 
         const users = dbAccess(Users);
 
         try {
-            const googleId = await google.verifyAuthToken(req.body.token);
+            // const googleId = await google.verifyAuthToken(req.body.token);
 
-            if (!googleId) {
-                return next(new Error('Invalid token'));
-            }
+            // if (!googleId) {
+            //     return next(new Error('Invalid token'));
+            // }
 
-            const user = await users.findOne({ googleId: googleId });
-            let token: string;
+            // const user = await users.findOne({ googleId: googleId });
+            // let token: string;
 
-            if (user === null) {
-                const newUser = await users.create({ googleId: googleId });
+            // if (user === null) {
+            //     const newUser = await users.create({ googleId: googleId });
 
-                if (newUser === null) {
-                    return next(new Error('Uh-oh! Something went wrong'));
-                }
+            //     if (newUser === null) {
+            //         return next(new Error('Uh-oh! Something went wrong'));
+            //     }
 
-                token = authToken.generate({ user: newUser._id });
+            //     token = authToken.generate({ user: newUser._id });
 
-            } else {
-                token = authToken.generate({ user: user._id });
-            }
+            // } else {
+            //     token = authToken.generate({ user: user._id });
+            // }
 
             return res.status(200).json({ 
                 message: 'Successful Google sign-in',
-                token: token
+                //token: token
              });
 
         } catch (e) {

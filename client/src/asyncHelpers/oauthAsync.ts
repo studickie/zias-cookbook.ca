@@ -18,6 +18,7 @@ export async function requestToken (authToken: string): Promise<any> {
     const response = await fetch(`${API_URL}/oauth2/google/authenticate`, {
         method: 'POST',
         body: json,
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         }

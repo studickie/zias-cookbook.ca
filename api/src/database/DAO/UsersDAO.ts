@@ -1,5 +1,5 @@
-import BaseRepo from './BaseRepo';
-import User, { DbUser, DbUserAuthCredentials } from '../models/User';
+import BaseRepo from './MongoDAO';
+import User, { DbUser, DbUserAuthCredentials } from '../DTO/User';
 
 export default class UsersRepo extends BaseRepo<DbUser> {
 
