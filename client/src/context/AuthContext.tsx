@@ -2,93 +2,68 @@ import React from 'react';
 
 interface AuthState {
     hasAuthenticated: boolean;
+    token: string | null;
 }
 
 const initialState: AuthState = {
-    hasAuthenticated: false
+    hasAuthenticated: false,
+    token: null
 }
 
-const AuthStateContext = React.createContext(({} as AuthState));
-
-/**
- * Provides read access to auth state
- */
-export function useAuthState (): AuthState {
-    const context = React.useContext(AuthStateContext);
-
-    if (!context) {
-        throw new Error('Context not provided');
-    }
-
-    return context;
-}
-
-type AuthDispatchAction = 
+type AuthReducerActions =
     | {
-        type: 'LOGIN_SUCCESS';
-        hasAuthenticated: boolean;
+        type: 'LOGIN';
+        token: string;
     }
     | {
-        type: 'LOGOUT';
-        hasAuthenticated: false;
+        type: 'LOGOUT'
     };
 
-function authDispatch (state: AuthState, action: AuthDispatchAction): AuthState {
-    switch(action.type) {
-        case 'LOGIN_SUCCESS':
+type AuthReducer = (state: AuthState, action: AuthReducerActions) => AuthState;
+
+function authReducer(state: AuthState, action: AuthReducerActions): AuthState {
+    switch (action.type) {
+        case 'LOGIN':
             return {
                 ...state,
                 ...{
-                    hasAuthenticated: action.hasAuthenticated
+                    hasAuthenticated: true,
+                    token: action.token
                 }
-            }
-            case 'LOGOUT':
+            };
+        case 'LOGOUT':
             return {
                 ...state,
                 ...{
-                    hasAuthenticated: action.hasAuthenticated
+                    hasAuthenticated: false,
+                    token: null
                 }
-            }
+            };
         default:
             return state;
     }
 }
 
-export type AuthDispatch = React.Dispatch<AuthDispatchAction>;
+type AuthDispatch = React.Dispatch<AuthReducerActions>;
 
-const AuthStateDispatch = React.createContext(({} as  AuthDispatch));
-
-/**
- * Provides write access to auth state
- */
-export function useAuthDispatch (): AuthDispatch {
-    const dispatch = React.useContext(AuthStateDispatch);
-
-    if (!dispatch) {
-        throw new Error('Dispatch not provided');
-    }
-
-    return dispatch;
+interface AuthProvider {
+    authState: AuthState;
+    authDispatch: AuthDispatch;
 }
+
+export const AuthContext = React.createContext(({} as AuthProvider));
 
 interface Props {
     children: React.ReactNode;
 }
 
-/**
- * React Context provider for auth state
- * 
- * @param props [children] React child node
- */
-export default function AuthProvider (props: Props): JSX.Element {
-    
-    const [state, dispatch] = React.useReducer(authDispatch, initialState);
+export function AuthProvider({ children }: Props): JSX.Element {
+
+    const [authState, authDispatch] = React.useReducer<AuthReducer>(authReducer, initialState);
 
     return (
-        <AuthStateContext.Provider value={state}>
-            <AuthStateDispatch.Provider value={dispatch}>
-                { props.children }
-            </AuthStateDispatch.Provider>
-        </AuthStateContext.Provider>
+        <AuthContext.Provider value={{ authState, authDispatch }}>
+            { children}
+        </AuthContext.Provider>
     );
 }

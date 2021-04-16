@@ -1,55 +1,30 @@
 import React from 'react';
-import { Switch, Route, Link as RouterLink } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
+import { AuthProvider, AuthContext } from './context/AuthContext';
+import MainPage from './pages/MainPage/MainPage';
+import AccountPage from './pages/AccountPage/AccountPage';
+import ProtectedRoute from './routes/ProtectedRoute';
 import OauthCallbackPage from './pages/OauthCallbackPage/OauthCallbackPage';
-import GoogleSignIn from './components/GoogleSignin/GoogleSignin';
+
 
 function App(): JSX.Element {
 
-	const handleCheckSession = async () => {
-		try {
-			fetch(`${process.env.REACT_APP_API_URL}`, {
-				method: 'GET',
-				credentials: 'include'
-			})
-			.then(res => res.json())
-			.then(data => console.log('return', data));
-
-		} catch (e) {
-			console.log('[ERROR] - handleCheckSession: ', e);
-		}
-	}
-
+	const { authState } = React.useContext(AuthContext);
 
 	return (
-		<div>
-			<header>
-				<h1>Zia's Cookbook</h1>
-				<GoogleSignIn />
-			</header>
-			<ul>
-				<li>
-					<RouterLink to='/'>Home</RouterLink>
-				</li>
-				<li>
-					<RouterLink to='/login/google_callback'>Oauth</RouterLink>
-				</li>
-			</ul>
-			<div>
-				<button onClick={handleCheckSession}>
-					session check
-				</button>
-			</div>
-			<div>
-				<Switch>
-					<Route exact path='/'>
-						<h2>Home</h2>
-					</Route>
-					<Route path='/login/google_callback'>
-						<OauthCallbackPage />
-					</Route>
-				</Switch>
-			</div>
-		</div>
+		<AuthProvider>
+			<Switch>
+				<Route exact path='/'>
+					<MainPage />
+				</Route>
+				<ProtectedRoute path='/account'>
+					<AccountPage />
+				</ProtectedRoute>
+				<Route path='/login/google_callback'>
+					<OauthCallbackPage />
+				</Route>
+			</Switch>
+		</AuthProvider>
 	);
 }
 

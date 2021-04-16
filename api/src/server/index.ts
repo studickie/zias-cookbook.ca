@@ -1,12 +1,8 @@
-import express, {Request, Response, NextFunction} from 'express';
-import session from 'express-session';
-import MongoDBStore from 'connect-mongodb-session';
-const MongoStore = MongoDBStore(session);
+import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import useError from './middleware/useError';
-//import authRoutes from './routes/authRoutes';
-import oauthRoutes from './routes/oauth2Routes';
-import rootRoutes from './routes/rootRoutes';
+import accountRoutes from './routes/accountRoutes';
 import dbConnect from '../database';
 import logEvent from '../logger';
 //import nodemailerStartup from '../mailer';
@@ -23,11 +19,6 @@ async function main() {
         const dbPass = process.env.DB_PASS || '';
 
         const dbAccess = await dbConnect(dbHost, dbName, dbUser, dbPass);
-
-        const sessionStore = new MongoStore({
-            uri: `mongodb://${dbUser}:${dbPass}@${dbHost}/${dbName}`,
-            collection: 'sessions'
-        });
 
         // Mail Service
         // const mailHost = process.env.MAIL_HOST || '';
@@ -53,26 +44,19 @@ async function main() {
             credentials: true, 
             origin: 'http://localhost:3000'
         }));
-        app.use(session({
-            secret: 'session!secret?',
-            cookie: {
-                maxAge: 1000 * 60 * 60,
-                httpOnly: true
-            },
-            store: sessionStore,
-            resave: false,
-            saveUninitialized: false
-        }));
+        app.use(cookieParser(secret));
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
 
         //* Configure routes
+
         const router = express.Router();
-        app.get('/', async (req: Request, res: Response, next: NextFunction) => {
-            return res.status(200).json({ message: "Good Request?", session: req.session});
-        });
-        
-        app.use('/oauth2', oauthRoutes(router, { googleService, dbAccess }));
+        /* 
+            Primary routes:
+            1) Account: Account and subroutes handle requests related to the owner of the account - e.g.: authentication, recipie CRUD op's
+            2) Search: handles search operations which are available without an account
+        */
+        app.use('/account', accountRoutes(router, { googleService, dbAccess, tokenService }));
 
         app.use(useError);
 

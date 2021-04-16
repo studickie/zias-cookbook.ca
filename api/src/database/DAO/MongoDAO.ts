@@ -1,12 +1,12 @@
 import { Db, ObjectId } from 'mongodb';
+import { DbBase } from '../dataTypes';
 
 type MongoCollection = 
     | 'users' 
     | 'userTokens';
 
-type DbId = { _id: string | number | ObjectId | undefined };
 
-export default abstract class BaseRepo<T extends DbId> {
+export default abstract class BaseRepo<T extends DbBase> {
     protected readonly _context: Db;
     protected readonly _collection: MongoCollection;
 
