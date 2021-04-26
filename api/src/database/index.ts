@@ -1,8 +1,13 @@
-import { MongoClient, Db } from 'mongodb';
+import { Db, MongoClient } from 'mongodb';
 
-export type AccessConstructor = <T>(Repo: new (db: Db) => T) => InstanceType<typeof Repo>;
+const dbHost = process.env.DB_HOST || '';
+const dbName = process.env.DB_NAME || '';
+const dbUser = process.env.DB_USER || '';
+const dbPass = process.env.DB_PASS || '';
 
-export default async function dbConnect(dbHost: string, dbName: string, dbUser: string, dbPass: string): Promise<AccessConstructor> {
+type AccessConstructor = <T>(Repo: new (db: Db) => T) => InstanceType<typeof Repo>;
+
+export default async function databaseLoader(): Promise<AccessConstructor> {
     
     const client = new MongoClient(`mongodb://${dbUser}:${dbPass}@${dbHost}/${dbName}`, {
         useUnifiedTopology: true
@@ -10,5 +15,5 @@ export default async function dbConnect(dbHost: string, dbName: string, dbUser: 
 
     await client.connect();
 
-    return (Repo) => new Repo(client.db(dbName));
+    return (DAO) => new DAO(client.db(dbName));
 }

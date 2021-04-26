@@ -5,7 +5,7 @@ interface RequestGoogleAuthUrlResponse {
 }
 
 export async function requestUrl (): Promise<RequestGoogleAuthUrlResponse> {
-    const response = await fetch(`${API_URL}/account/authenticate/google`);
+    const response = await fetch(`${API_URL}/accounts/authenticate/google`);
 
     return await response.json();
 }
@@ -15,7 +15,7 @@ export async function requestToken (authToken: string): Promise<{ token: string 
         auth_token: authToken
     });
 
-    const response = await fetch(`${API_URL}/account/authenticate/google`, {
+    const response = await fetch(`${API_URL}/accounts/authenticate/google`, {
         method: 'POST',
         body: json,
         credentials: 'include',

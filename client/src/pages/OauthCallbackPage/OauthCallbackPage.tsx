@@ -17,7 +17,7 @@ function OauthCallbackPage (): JSX.Element {
 
                 authDispatch({ type: 'LOGIN', token });
 
-                history.push('/account');
+                history.push('/accounts');
 
             } catch (e) {
                 console.log('error', e);
