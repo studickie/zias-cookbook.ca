@@ -1,6 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
-const accountSchema = new Schema({
+const accountSchema = new Schema();
+
+accountSchema.add({
     googleId: String,
     googleToken: String,
     googleRef: String

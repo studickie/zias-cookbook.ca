@@ -17,6 +17,7 @@ export default async function databaseLoader(): Promise<void> {
             useUnifiedTopology: true,
             useNewUrlParser: true
         });
+        
     } catch (e) {
         // TODO: log error
 

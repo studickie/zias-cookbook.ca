@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import catchErrorMiddleware from './server/middleware/catchErrorMiddleware';
+import verifyTokenMiddleware from './server/middleware/verifyTokenMiddleware';
 import accountsRoutes from './server/routes/accountsRoutes';
+import recipiesRoutes from './server/routes/recipiesRoutes';
 import databaseLoader from './database';
 
 async function startup() {
@@ -21,6 +23,7 @@ async function startup() {
         app.use(express.json());
 
         app.use('/accounts', accountsRoutes);
+        app.use('/accounts/recipies', verifyTokenMiddleware, recipiesRoutes);
 
         app.use(catchErrorMiddleware);
 
