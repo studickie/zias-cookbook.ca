@@ -1,8 +1,8 @@
 import React from 'react';
-import Page from '../../components/Page/Page';
 import { useHistory, useLocation } from 'react-router-dom';
-import { requestToken } from '../../asyncHelpers/oauthAsync';
 import { AuthContext } from '../../context/AuthContext';
+import { requestOauth2Verify } from '../../asyncHelpers/oauthAsync';
+import Page from '../../components/Page/Page';
 
 function OauthCallbackPage (): JSX.Element {
     const location = useLocation();
@@ -13,7 +13,7 @@ function OauthCallbackPage (): JSX.Element {
     React.useEffect(() => {
         async function request (code: string) {
             try {
-                const { token } = await requestToken(code);
+                const { token } = await requestOauth2Verify(code);
 
                 authDispatch({ type: 'LOGIN', token });
 

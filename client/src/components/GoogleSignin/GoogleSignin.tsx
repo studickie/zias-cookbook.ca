@@ -1,13 +1,13 @@
-//import * as React from 'react';
-import { requestUrl } from '../../asyncHelpers/oauthAsync';
+import * as React from 'react';
+import { requestOauth2Url } from '../../asyncHelpers/oauthAsync';
 
 function GoogleSignIn(): JSX.Element {
 
     const handleGoogleLogin = async () => {
         try {
-            const response = await requestUrl();
+            const { authUrl } = await requestOauth2Url();
 
-            window.location.assign(response.auth_url);
+            window.location.assign(authUrl);
 
         } catch (e) {
             console.log('error', e);

@@ -1,67 +1,42 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import catchAsync from '../helpers/catchAsync';
+import accounts from '../../database/schemas/Accounts';
+import jwToken from '../../helpers/jwToken';
+import googleService from '../../services/GoogleService';
 
 const router = express.Router();
 
-router.get('/authenticate/google', (req: Request, res: Response, next: NextFunction) => {
-    try {
-        //const authUrl = googleService.generateAuthenticationUrl('basic');
-        
-        return res.status(200).json({ 
-            //auth_url: authUrl 
+router.get('/authenticate/google', catchAsync(async (req, res) => {
+    const authUrl = googleService.generateAuthenticationUrl('basic');
+
+    return res.status(200).json({ authUrl });
+}));
+
+router.post('/authenticate/google', catchAsync(async (req, res) => {
+    const { auth_token } = req.body;
+    const decodedToken = decodeURIComponent(auth_token);
+
+    const userInfo = await googleService.verifyAuthenticationCode(decodedToken);
+
+    const matchedAccount = await accounts.findOne({ googleId: userInfo.user.id });
+
+    let accountId: string;
+    if (matchedAccount) {
+        accountId = matchedAccount.id;
+
+    } else {
+        const accountDoc = await accounts.create({
+            googleId: (userInfo.user.id as string),
+            googleToken: (userInfo.tokens.access_token as string),
+            googleRef: userInfo.tokens.refresh_token || undefined
         });
 
-    } catch (e) {
-        // TODO: proper logging
-        console.log(`[ERROR]: GET /google/authenticate - ${e}`);
-
-        return next(e);
+        accountId = accountDoc.id;
     }
-});
 
-router.post('/authenticate/google', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { auth_token } = req.body;
-        const decodedToken = decodeURIComponent(auth_token);
+    const token = jwToken.generate({ account: accountId });
 
-        //const userInfo = await googleService.verifyAuthenticationCode(decodedToken);
-
-        // TODO: should be update; pass new access_token, refresh_token if available
-        // const existingUser = await users.findOne({ googleId: userInfo.user.id });
-
-        // let userId: string;
-        // if (existingUser) {
-        //     userId = (existingUser._id as string);
-        // } else {
-        //     const newUser = await users.create({
-        //         googleId: (userInfo.user.id as string),
-        //         googleToken: (userInfo.tokens.access_token as string),
-        //         googleRef: userInfo.tokens.refresh_token || undefined
-        //     });
-
-        //     if (!newUser) {
-        //         return next(new Error('Oops! Something went wrong.'));
-        //     }
-
-        //     userId = (newUser._id as string);
-        // }
-
-        // const token = tokenService.generate({ user: userId });
-        
-        // res.cookie('refresh_token', token, {
-        //     maxAge: 1000 * 60 * 60 * 60 * 2,
-        //     httpOnly: true
-        // });
-
-        return res.status(200).json({
-            check: 'Good Check!',
-            //userInfo
-        });
-
-    } catch (e) {
-        console.log(`[ERROR]: POST /google/authenticate - ${e}`);
-
-        return next(e);
-    }
-});
+    return res.status(200).json({ token });
+}));
 
 export default router;

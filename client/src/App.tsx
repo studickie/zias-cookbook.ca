@@ -17,7 +17,7 @@ function App(): JSX.Element {
 				<Route exact path='/'>
 					<MainPage />
 				</Route>
-				<ProtectedRoute path='/account'>
+				<ProtectedRoute path='/accounts'>
 					<AccountPage />
 				</ProtectedRoute>
 				<Route path='/login/google_callback'>

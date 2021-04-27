@@ -6,7 +6,7 @@ const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
 type AuthenicationScope = 'basic';
 
-export default class GoogleService {
+class GoogleService {
     private _oauth2Client: Auth.OAuth2Client;
 
     constructor() {
@@ -52,3 +52,5 @@ export default class GoogleService {
         return { user: user.data, tokens };
     }
 }
+
+export default new GoogleService();
