@@ -1,67 +1,60 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Router } from 'express';
+import Accounts from '../../models/Accounts';
+import AccountsDAO from '../../database/dao/AccountsDAO';
+import GoogleService from '../../services/GoogleService';
+import catchAsync from '../helpers/catchAsync';
+import { DbAccount } from '../../database/mongodb/dataTypes';
+import jwToken from '../../helpers/jwToken';
 
-const router = express.Router();
+export default function accountsRoute(
+    accounts: Accounts,
+    dbAccounts: AccountsDAO,
+    googleService: GoogleService
+): Router {
 
-router.get('/authenticate/google', (req: Request, res: Response, next: NextFunction) => {
-    try {
-        //const authUrl = googleService.generateAuthenticationUrl('basic');
-        
-        return res.status(200).json({ 
-            //auth_url: authUrl 
-        });
+    const router = express.Router();
 
-    } catch (e) {
-        // TODO: proper logging
-        console.log(`[ERROR]: GET /google/authenticate - ${e}`);
+    router.get('/authenticate/google', catchAsync(async (req, res) => {
+        const authUrl = googleService.generateAuthenticationUrl('basic');
 
-        return next(e);
-    }
-});
+        return res.status(200).json({ authUrl });
+    }));
 
-router.post('/authenticate/google', async (req: Request, res: Response, next: NextFunction) => {
-    try {
+    router.post('/authenticate/google', catchAsync(async (req, res, next) => {
         const { auth_token } = req.body;
         const decodedToken = decodeURIComponent(auth_token);
 
-        //const userInfo = await googleService.verifyAuthenticationCode(decodedToken);
+        const userInfo = await googleService.verifyAuthenticationCode(decodedToken);
 
-        // TODO: should be update; pass new access_token, refresh_token if available
-        // const existingUser = await users.findOne({ googleId: userInfo.user.id });
+        const matchedAccount = await dbAccounts.findOne({ googleId: (userInfo.user.id as string) });
 
-        // let userId: string;
-        // if (existingUser) {
-        //     userId = (existingUser._id as string);
-        // } else {
-        //     const newUser = await users.create({
-        //         googleId: (userInfo.user.id as string),
-        //         googleToken: (userInfo.tokens.access_token as string),
-        //         googleRef: userInfo.tokens.refresh_token || undefined
-        //     });
+        let accountId: string;
+        if (matchedAccount) {
+            accountId = (matchedAccount._id as string);
 
-        //     if (!newUser) {
-        //         return next(new Error('Oops! Something went wrong.'));
-        //     }
+        } else {
+            const createdAccount = await accounts.create({
+                googleId: (userInfo.user.id as string),
+                googleToken: (userInfo.tokens.access_token as string),
+                googleRef: userInfo.tokens.refresh_token || undefined
+            });
 
-        //     userId = (newUser._id as string);
-        // }
+            if (!createdAccount) {
+                return next(new Error('Oops! Something went wrong.'));
+            }
 
-        // const token = tokenService.generate({ user: userId });
-        
+            accountId = ((createdAccount as DbAccount)._id as string);
+        }
+
+        const token = jwToken.generate({ account: accountId });
+
         // res.cookie('refresh_token', token, {
         //     maxAge: 1000 * 60 * 60 * 60 * 2,
         //     httpOnly: true
         // });
 
-        return res.status(200).json({
-            check: 'Good Check!',
-            //userInfo
-        });
+        return res.status(200).json({ token });
+    }));
 
-    } catch (e) {
-        console.log(`[ERROR]: POST /google/authenticate - ${e}`);
-
-        return next(e);
-    }
-});
-
-export default router;
+    return router;
+}

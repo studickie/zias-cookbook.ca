@@ -1,24 +1,23 @@
 const API_URL = process.env.REACT_APP_API_URL;
 
-interface RequestGoogleAuthUrlResponse {
-    auth_url: string;
-}
-
-export async function requestUrl (): Promise<RequestGoogleAuthUrlResponse> {
+export async function requestUrl (): Promise<{
+    authUrl: string;
+}> {
     const response = await fetch(`${API_URL}/accounts/authenticate/google`);
 
     return await response.json();
 }
 
-export async function requestToken (authToken: string): Promise<{ token: string }> {
-    const json = JSON.stringify({
+export async function requestToken (authToken: string): Promise<{ 
+    token: string 
+}> {
+    const jsonData = JSON.stringify({
         auth_token: authToken
     });
 
     const response = await fetch(`${API_URL}/accounts/authenticate/google`, {
         method: 'POST',
-        body: json,
-        credentials: 'include',
+        body: jsonData,
         headers: {
             'Content-Type': 'application/json'
         }

@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { IAccount } from '../../models/Accounts';
+import { Account } from '../../models/Accounts';
 
 export interface DbBase {
     _id: string | ObjectId;
@@ -7,4 +7,4 @@ export interface DbBase {
     // updatedOn: Date;
 }
 
-export interface DbAccount extends DbBase, IAccount {}
+export interface DbAccount extends DbBase, Account {}

@@ -26,7 +26,7 @@ export default abstract class MongoAccess<T extends DbBase> {
         return await this._context.collection(this._collection).findOne(filters);
     }
 
-    public async insertOne(insertDoc: Omit<T, Extract<DbBase, '_id'>>): Promise<T | null> {
+    public async insertOne(insertDoc: Partial<T>): Promise<T | null> {
 
         const response = await this._context.collection(this._collection).insertOne(insertDoc);
 

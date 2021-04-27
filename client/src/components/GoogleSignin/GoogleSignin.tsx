@@ -5,9 +5,9 @@ function GoogleSignIn(): JSX.Element {
 
     const handleGoogleLogin = async () => {
         try {
-            const response = await requestUrl();
+            const {authUrl } = await requestUrl();
 
-            window.location.assign(response.auth_url);
+            window.location.assign(authUrl);
 
         } catch (e) {
             console.log('error', e);

@@ -1,6 +1,6 @@
 import logger from './winston';
 import { EventEmitter } from 'events';
-import DatabaseError from '../helpers/error/DatabaseError';
+import DatabaseError from '../error/DatabaseError';
 
 const logEvent = new EventEmitter();
 

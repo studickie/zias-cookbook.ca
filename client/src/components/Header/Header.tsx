@@ -21,7 +21,7 @@ function Header(): JSX.Element {
                             { authState.hasAuthenticated
                                     ? <React.Fragment>
                                         <li>
-                                            <RouterLink to='/account'>
+                                            <RouterLink to='/accounts'>
                                                 Account
                                             </RouterLink>
                                         </li>
