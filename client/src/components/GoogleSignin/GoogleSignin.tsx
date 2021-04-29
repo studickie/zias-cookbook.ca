@@ -3,21 +3,23 @@ import { requestOauth2Url } from '../../asyncHelpers/oauthAsync';
 
 function GoogleSignIn(): JSX.Element {
 
-    const handleGoogleLogin = async () => {
-        try {
-            const { authUrl } = await requestOauth2Url();
+    // const handleGoogleLogin = async () => {
+    //     try {
+    //         const { authUrl } = await requestOauth2Url();
 
-            window.location.assign(authUrl);
+    //         window.location.assign(authUrl);
 
-        } catch (e) {
-            console.log('error', e);
-        }
-    }
+    //     } catch (e) {
+    //         console.log('error', e);
+    //     }
+    // }
+
+    // <button onClick={handleGoogleLogin}>
+    //         Sign In with Google
+    //     </button>
 
     return (
-        <button onClick={handleGoogleLogin}>
-            Sign In with Google
-        </button>
+        <div id='btn_google_oauth'></div>
     );
 }
 
