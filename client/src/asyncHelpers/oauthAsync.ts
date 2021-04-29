@@ -1,6 +1,6 @@
 const API_URL = process.env.REACT_APP_API_URL;
 
-export async function requestOauth2Url (): Promise<{
+export async function requestOauth2Url(): Promise<{
     authUrl: string;
 }> {
     const response = await fetch(`${API_URL}/accounts/authenticate/google`);
@@ -8,11 +8,12 @@ export async function requestOauth2Url (): Promise<{
     return await response.json();
 }
 
-export async function requestOauth2Verify (authToken: string): Promise<{ 
+export async function requestOauth2Verify(token: string): Promise<{ 
     token: string 
 }> {
     const json = JSON.stringify({
-        auth_token: authToken
+        //auth_token: authToken,
+        id_token: token
     });
 
     const response = await fetch(`${API_URL}/accounts/authenticate/google`, {

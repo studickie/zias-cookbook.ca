@@ -6,19 +6,25 @@ import AccountPage from './pages/AccountPage/AccountPage';
 import RecipiePage from './pages/RecipiePage/RecipiePage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import OauthCallbackPage from './pages/OauthCallbackPage/OauthCallbackPage';
+import { requestOauth2Verify } from './asyncHelpers/oauthAsync';
 
 function App(): JSX.Element {
 
-	function requestGoogleSignin(googleId: string): void {
+	async function requestGoogleSignin(googleId: string): Promise<void> {
 		try {
-			console.log('requesting app sign-in using google Id: ', googleId);
+			const response = await requestOauth2Verify(googleId);
+
+			console.log('response', response);
+			
 		} catch (e) {
 			console.log('[ERROR] - requestGoogleSignin: ', e);
 		}
 	}
 
 	function handleSuccess(googleUser: gapi.auth2.GoogleUser): void {
-		console.log('requesting app sign-in using google Id: ', googleUser);
+		const { id_token } = googleUser.getAuthResponse();
+
+		//requestGoogleSignin(id_token);
 	}
 
 	function handleFailure(reason: unknown): void {
@@ -40,8 +46,9 @@ function App(): JSX.Element {
 			.then(googleAuth => {
 
 				if (googleAuth.isSignedIn.get()) {
-					const { id_token } = googleAuth.currentUser.get().getAuthResponse();
-					requestGoogleSignin(id_token);
+					const authResponse = googleAuth.currentUser.get().getAuthResponse();
+					console.log('auth response', authResponse)
+					//requestGoogleSignin(id_token);
 
 				} else {
 					// TODO: set auth state as false
