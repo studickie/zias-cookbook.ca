@@ -1,5 +1,5 @@
-interface RecipieIngredient {
-    measurement: string;
+export interface RecipieIngredient {
+    measurement: number;
     measuringUnit: string;
     item: string;
 }
@@ -9,7 +9,7 @@ interface RecipieIngredientGroup {
     ingredients: RecipieIngredient[];
 }
 
-interface RecipieDirection {
+export interface RecipieDirection {
     sort: number;
     description: string;
 }

@@ -1,22 +1,22 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { AuthProvider, AuthContext } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import MainPage from './pages/MainPage/MainPage';
 import AccountPage from './pages/AccountPage/AccountPage';
+import RecipiePage from './pages/RecipiePage/RecipiePage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import OauthCallbackPage from './pages/OauthCallbackPage/OauthCallbackPage';
 
-
 function App(): JSX.Element {
-
-	const { authState } = React.useContext(AuthContext);
-
 	return (
 		<AuthProvider>
 			<Switch>
 				<Route exact path='/'>
 					<MainPage />
 				</Route>
+				<ProtectedRoute path='/accounts/recipies/create'>
+					<RecipiePage />
+				</ProtectedRoute>
 				<ProtectedRoute path='/accounts'>
 					<AccountPage />
 				</ProtectedRoute>

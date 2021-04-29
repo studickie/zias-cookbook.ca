@@ -1,5 +1,6 @@
-const API_URL = process.env.REACT_APP_API_URL;
 import { Recipie } from '../types/Recipie';
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 export async function requestAccountRecipies(): Promise<{
     recipies: Recipie[]
@@ -17,7 +18,7 @@ export async function requestAccountRecipieById(recipieId: string): Promise<{
     return await response.json();
 }
 
-export async function requestCreateRecipie(data: unknown): Promise<{
+export async function requestCreateRecipie(jwt: string, data: unknown): Promise<{
     recipie: Recipie
 }> {
     const jsonData = JSON.stringify(data);
@@ -26,6 +27,7 @@ export async function requestCreateRecipie(data: unknown): Promise<{
         method: 'POST',
         body: jsonData,
         headers: {
+            'Authorization': jwt,
             'Content-Type': 'application/json'
         }
     });

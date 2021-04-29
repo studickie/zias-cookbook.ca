@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema } from 'mongoose';
 
 const accountSchema = new Schema();
 
@@ -8,4 +8,4 @@ accountSchema.add({
     googleRef: String
 });
 
-export default mongoose.model('Accounts', accountSchema);
+export default accountSchema;

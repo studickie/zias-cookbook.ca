@@ -1,6 +1,6 @@
 import express from 'express';
 import catchAsync from '../helpers/catchAsync';
-import recipies from '../../database/schemas/Recipies';
+import recipies from '../../database/models/recipiesModel';
 
 const router = express.Router();
 
@@ -28,7 +28,14 @@ router.get('/:id', catchAsync(async (req, res) => {
  */
 router.post('/', catchAsync(async (req, res) => {
 
-    return res.status(200).json({  });
+    const createdRecipie = await recipies.create({
+        title: req.body.title,
+        authoredBy: req.accountId,
+        subscribers: [req.accountId],
+        ingredients: req.body.ingredients
+    });
+
+    return res.status(200).json({ createdRecipie });
 }));
 
 /*

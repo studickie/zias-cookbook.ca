@@ -2,19 +2,19 @@ import { Request, Response, NextFunction } from 'express';
 import jwToken from '../../helpers/jwToken';
 
 export default function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction): void {
-    const { access_token } = req.body;
+    const { authorization } = req.headers;
 
-    if (!access_token) {
+    if (!authorization) {
         return next(new Error('Unauthorized'));
     }
 
-    const decoded = jwToken.verify(access_token);
+    const decoded = jwToken.verify(authorization);
 
     if (!decoded) {
         return next(new Error('Unauthorized'));
     }
 
-    console.log('decoded token', decoded);
+    req.accountId = (decoded as {data: { account: string }}).data.account;
 
     return next();
 }

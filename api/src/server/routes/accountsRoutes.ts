@@ -1,6 +1,6 @@
 import express from 'express';
 import catchAsync from '../helpers/catchAsync';
-import accounts from '../../database/schemas/Accounts';
+import accounts from '../../database/models/accountsModel';
 import jwToken from '../../helpers/jwToken';
 import googleService from '../../services/GoogleService';
 

@@ -1,3 +1,5 @@
 import * as React from 'react';
 
-export default function useGoogleOAuth(): void { }
+function useGoogleOAuth(): void { }
+
+export default useGoogleOAuth;
