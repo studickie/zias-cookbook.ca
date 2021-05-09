@@ -1,9 +1,10 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import catchErrorMiddleware from './server/middleware/catchErrorMiddleware';
-import verifyTokenMiddleware from './server/middleware/verifyTokenMiddleware';
-import accountsRoutes from './server/routes/accountsRoutes';
-import recipiesRoutes from './server/routes/recipiesRoutes';
+//import catchErrorMiddleware from './server/middleware/catchErrorMiddleware';
+//import verifyTokenMiddleware from './server/middleware/verifyTokenMiddleware';
+import authRoutes from './server/routes/authRoutes';
+import ouath2Routes from './server/routes/ouath2Routes';
+//import recipesRoutes from './server/routes/recipesRoutes';
 import databaseLoader from './database';
 
 async function startup() {
@@ -22,10 +23,17 @@ async function startup() {
 
         app.use(express.json());
 
-        app.use('/accounts', accountsRoutes);
-        app.use('/accounts/recipies', verifyTokenMiddleware, recipiesRoutes);
+        app.use(authRoutes);
+        app.use(ouath2Routes);
 
-        app.use(catchErrorMiddleware);
+        app.use('*', (req, res, next) => next(new Error('Url Not Found')));
+
+        app.use((err: Error, req: Request, res: Response, next: NextFunction) => (
+            res.status(500).json({
+                name: err.name,
+                message: err.message
+            })
+        ));
 
         const port = process.env.PORT || 3000;
 

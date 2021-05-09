@@ -1,25 +1,25 @@
-import { Recipie } from '../types/Recipie';
+import Recipe from '../types/recipe.interface.ts';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 export async function requestAccountRecipies(): Promise<{
-    recipies: Recipie[]
+    recipies: Recipe[]
 }> {
     const response = await fetch(`${API_URL}/accounts/recipies`);
 
     return await response.json();
 }
 
-export async function requestAccountRecipieById(recipieId: string): Promise<{
-    recipie: Recipie
+export async function requestAccountRecipeById(recipeId: string): Promise<{
+    recipe: Recipe
 }> {
-    const response = await fetch(`${API_URL}/accounts/recipies/${recipieId}`);
+    const response = await fetch(`${API_URL}/accounts/recipies/${recipeId}`);
 
     return await response.json();
 }
 
-export async function requestCreateRecipie(jwt: string, data: unknown): Promise<{
-    recipie: Recipie
+export async function requestCreateRecipe(jwt: string, data: Omit<Recipe, 'id'>): Promise<{
+    recipe: Recipe
 }> {
     const jsonData = JSON.stringify(data);
 
@@ -35,12 +35,12 @@ export async function requestCreateRecipie(jwt: string, data: unknown): Promise<
     return await response.json();
 }
 
-export async function requestUpdateRecipie(recipieId: string, data: unknown): Promise<{
-    recipie: Recipie
+export async function requestUpdateRecipe(recipeId: string, data: unknown): Promise<{
+    recipe: Recipe
 }> {
     const jsonData = JSON.stringify(data);
 
-    const response = await fetch(`${API_URL}/accounts/recipies/${recipieId}`, {
+    const response = await fetch(`${API_URL}/accounts/recipies/${recipeId}`, {
         method: 'PUT',
         body: jsonData,
         headers: {
@@ -51,9 +51,9 @@ export async function requestUpdateRecipie(recipieId: string, data: unknown): Pr
     return await response.json();
 }
 
-export async function requestRemoveRecipie(recipieId: string): Promise<unknown> {
+export async function requestRemoveRecipe(recipeId: string): Promise<unknown> {
 
-    const response = await fetch(`${API_URL}/accounts/recipies/${recipieId}`, {
+    const response = await fetch(`${API_URL}/accounts/recipies/${recipeId}`, {
         method: 'DELETE'
     });
 

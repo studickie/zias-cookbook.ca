@@ -1,0 +1,19 @@
+<div style="font-family:Arial, Helvetica, sans-serif; font-size:16px;">
+    <p>A user with email address <span style="font-weight: 600;">###EMAIL_FROM###</span> has requested permissions to create an account</p>
+
+    <form method="POST" action="http://localhost:4000">
+        <input type="hidden" name="request_id" value="###REQUEST_ID###"/>
+        <fieldset>
+            <legend>Response:</legend>
+            <label>
+                <input type="radio" name="response" value="accept" checked="true"/>
+                Accept
+            </label>
+            <label>
+                <input type="radio" name="response" value="decline"/>
+                Decline
+            </label>
+        </fieldset>
+        <input type="submit" value="Submit"/>
+    </form>
+</div>

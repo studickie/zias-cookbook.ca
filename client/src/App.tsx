@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import MainPage from './pages/MainPage/MainPage';
 import AccountPage from './pages/AccountPage/AccountPage';
-import RecipiePage from './pages/RecipiePage/RecipiePage';
+import RecipePage from './pages/RecipePage/RecipePage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import OauthCallbackPage from './pages/OauthCallbackPage/OauthCallbackPage';
 
@@ -15,7 +15,7 @@ function App(): JSX.Element {
 					<MainPage />
 				</Route>
 				<ProtectedRoute path='/accounts/recipies/create'>
-					<RecipiePage />
+					<RecipePage />
 				</ProtectedRoute>
 				<ProtectedRoute path='/accounts'>
 					<AccountPage />

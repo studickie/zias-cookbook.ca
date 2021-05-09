@@ -1,7 +1,7 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import { RecipieIngredient } from '../../types/Recipie';
+import Ingredient from '../../types/ingredient.interface';
 
 interface ControlState {
     measurementPrimary: number;
@@ -15,7 +15,7 @@ function controlReducer(prevState: ControlState, nextState: Partial<ControlState
 }
 
 interface Props {
-    config: RecipieIngredient;
+    config: Ingredient;
 } 
 
 function IngredientControl({ config }: Props): JSX.Element {

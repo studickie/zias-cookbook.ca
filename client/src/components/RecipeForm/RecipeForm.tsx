@@ -1,19 +1,21 @@
 import React from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import { RecipieIngredient } from '../../types/Recipie';
-import { requestCreateRecipie } from '../../asyncHelpers/recipieAsync';
+
+import { requestCreateRecipe } from '../../asyncHelpers/recipeAsync';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import IngredientControl from '../IngredientControl/IngredientControl';
+import Recipie from '../../types/recipe.interface.ts';
+import Ingredient from '../../types/ingredient.interface';
 
-interface FormState {
-    title: string;
-    ingredients: RecipieIngredient[];
+interface FormState { 
+    recipie: Recipie,
+    unsavedIngredient: Omit<Ingredient, 'id'> | null;
 }
 
 type FormReducerAction =
     | {
-        type: 'MODIFY_FIELD';
+        type: 'MODIFY_RECIPIE_TITLE';
         field: keyof FormState;
         value: string;
     }
@@ -23,38 +25,30 @@ type FormReducerAction =
 
 function formReducer(state: FormState, action: FormReducerAction): FormState {
     switch (action.type) {
-        case 'MODIFY_FIELD':
-            return {
-                ...state,
-                ...{
-                    [action.field]: action.value
-                }
-            };
+        case 'MODIFY_RECIPIE_TITLE':
+            return state;
         case 'ADD_INGREDIENT_FIELD':
-            return {
-                ...state,
-                ...{
-                    ingredients: [...state.ingredients, {
-                        item: '',
-                        measurement: 0,
-                        measuringUnit: ''
-                    }]
-                }
-            }
+            return state;
         default:
             return state;
     }
 }
 
-interface Props { }
+interface Props { 
+    injectRecipie: Recipie;
+}
 
-function RecipieForm({ }: Props): JSX.Element {
+function RecipieForm({ injectRecipie }: Props): JSX.Element {
 
     const { authState } = React.useContext(AuthContext);
 
     const [formState, formDispatch] = React.useReducer(formReducer, {
-        title: '',
-        ingredients: []
+        recipie: {
+            id: injectRecipie.id || '-1',
+            title: injectRecipie.title || '',
+            ingredients: [...injectRecipie.ingredients] || []
+        },
+        unsavedIngredient: null
     });
 
     const handleCreateIngredient = () => {
@@ -63,7 +57,7 @@ function RecipieForm({ }: Props): JSX.Element {
 
     const handleSubmitCreate = async () => {
         try {
-            const response = await requestCreateRecipie((authState.token as string), {
+            const response = await requestCreateRecipe((authState.token as string), {
                 title: formState.title,
                 ingredients: formState.ingredients
             });

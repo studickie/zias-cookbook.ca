@@ -1,6 +1,9 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 
+import path from 'path';
+import fs from 'fs';
+
 const mailHost = process.env.MAIL_HOST;
 const mailUser = process.env.MAIL_USER;
 const mailPass = process.env.MAIL_PASS;
@@ -22,24 +25,41 @@ class MailerService {
         });
     }
 
-    public sendChangePassword(email: string, token: string): void {
-        const newPass = 'new!Pass?1234';
+    /**
+     *  Send an email to the app admin requesting permission to create an app account
+     */
+    public sendSignupRequest(emailFrom: string, requestId: string): void {
+        let replacedHtml = '';
 
-        const verifyUrl = `a href=http://localhost:4000/auth/resetPassword/${token}/?pass=${newPass}&verifyPass=${newPass}`;
+        const readable = fs.createReadStream(path.resolve(__dirname, '../../views/signupRequest.html'));
 
-        this.sendEmail(email, 'Zia\'s Cookbook - Reset Password', verifyUrl);
+        readable.on('data', (chunk) => {
+            replacedHtml = replacedHtml.concat(chunk.toString().replace(/###REQUEST_ID###/g, requestId));
+        });
+
+        readable.on('end', () => {
+            this.sendEmail('studickiecodes@gmail.com', 'New account request', replacedHtml);
+        });
     }
 
-    public sendVerificationEmail(email: string, token: string): void {
-        const verifyUrl = `<a href='http://localhost:4000/auth/verifyEmail/${token}'>Verify Now</a>`;
+    /**
+     *  Send an email to a user accepting their request for signup permissions
+     */
+    // public sendAcceptSignupResponse(emailTo: string): void {
 
-        this.sendEmail(email, 'Zia\'s Cookbook - Verify Email', verifyUrl);
-    }
+    // }
 
-    private async sendEmail(to: string, subject: string, body: string): Promise<void> {
+    /**
+     *  Send an email to a user declining their request for signup permissions
+     */
+    // public sendDeclineSignupResponse(emailTo: string): void {
+
+    // }
+
+    private async sendEmail(emailTo: string, subject: string, body: string): Promise<void> {
         try {
             await this._mail.sendMail({
-                to: to,
+                to: emailTo,
                 subject: subject,
                 text: 'Plaintext version of email',
                 html: body

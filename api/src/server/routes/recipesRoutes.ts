@@ -1,6 +1,6 @@
 import express from 'express';
 import catchAsync from '../helpers/catchAsync';
-import recipies from '../../database/models/recipiesModel';
+import Recipes from '../../database/models/RecipesModel';
 
 const router = express.Router();
 
@@ -28,14 +28,13 @@ router.get('/:id', catchAsync(async (req, res) => {
  */
 router.post('/', catchAsync(async (req, res) => {
 
-    const createdRecipie = await recipies.create({
-        title: req.body.title,
-        authoredBy: req.accountId,
-        subscribers: [req.accountId],
-        ingredients: req.body.ingredients
+    // TODO: add sanitization to form fields
+
+    const recipe = await Recipes.create({
+        title: req.body.title
     });
 
-    return res.status(200).json({ createdRecipie });
+    return res.status(200).json({ recipe });
 }));
 
 /*

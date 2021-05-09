@@ -20,6 +20,7 @@
     "express": "^4.17.1",
     "googleapis": "^70.0.0",
     "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.6",
     "mongoose": "^5.12.5",
     "nodemailer": "^6.4.17",
     "winston": "^3.3.3"
@@ -30,6 +31,7 @@
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.9",
     "@types/jsonwebtoken": "^8.5.0",
+    "@types/mongodb": "^3.6.12",
     "@types/mongoose": "^5.10.5",
     "@types/node": "^14.14.10",
     "@types/nodemailer": "^6.4.0",
