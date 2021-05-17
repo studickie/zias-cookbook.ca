@@ -29,16 +29,25 @@ class MailerService {
      *  Send an email to the app admin requesting permission to create an app account
      */
     public sendSignupRequest(emailFrom: string, requestId: string): void {
-        let replacedHtml = '';
+        new Promise<string>((resolve, reject) => {
+            let replacedHtml = '';
 
-        const readable = fs.createReadStream(path.resolve(__dirname, '../../views/signupRequest.html'));
+            const readable = fs.createReadStream(path.resolve(__dirname, '../../public/signupRequest.html'));
 
-        readable.on('data', (chunk) => {
-            replacedHtml = replacedHtml.concat(chunk.toString().replace(/###REQUEST_ID###/g, requestId));
-        });
+            readable.on('data', (chunk) => {
+                replacedHtml = replacedHtml.concat(chunk.toString().replace(/###REQUEST_ID###/g, requestId));
+            });
 
-        readable.on('end', () => {
-            this.sendEmail('studickiecodes@gmail.com', 'New account request', replacedHtml);
+            readable.on('end', () => resolve(replacedHtml));
+
+            readable.on('error', (err) => reject(err));
+        })
+        .then(value => {
+            // TODO: replace emailTo address with environment variable
+            this.sendEmail('studickiecodes@gmail.com', 'New account request', value);
+        })
+        .catch(error => {
+            //TODO: log error
         });
     }
 
@@ -71,6 +80,8 @@ class MailerService {
             // TODO: log error
 
             return;
+        } finally {
+            // TODO: log email event
         }
     }
 }

@@ -6,6 +6,7 @@ import authRoutes from './server/routes/authRoutes';
 import ouath2Routes from './server/routes/ouath2Routes';
 //import recipesRoutes from './server/routes/recipesRoutes';
 import databaseLoader from './database';
+import { IApplicationError } from './helpers/error/ApplicationError';
 
 async function startup() {
     try {
@@ -28,8 +29,8 @@ async function startup() {
 
         app.use('*', (req, res, next) => next(new Error('Url Not Found')));
 
-        app.use((err: Error, req: Request, res: Response, next: NextFunction) => (
-            res.status(500).json({
+        app.use((err: IApplicationError, req: Request, res: Response, next: NextFunction) => (
+            res.status(err.statusCode ? err.statusCode : 500).json({
                 name: err.name,
                 message: err.message
             })
