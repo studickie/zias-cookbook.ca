@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import bcrypt from 'bcrypt';
 
 /* 
     -------------------------------------------
@@ -40,11 +41,16 @@ interface AccountDefaultCredentials {
 }
 
 const AccountDefaultCredentialsSchema = new Schema({
+    /*
+        Password validation for database concerned only about it being filled/ not empty. 
+
+        Cannot be concerned with password formatting (checked in express middleware) because
+        the value should be hashed before it is added to a document.
+    */
     password: {
         type: String,
         required: [true, 'Required field "password" not provided.'],
-        min: [8, '"password" does not meet the minimum character length requirement.'],
-        max: [16, '"password" exceeds the maximum character length.']
+        min: 1
     }
 }, {
     _id: false
@@ -86,7 +92,9 @@ export interface Account {
     Defines Account object with mongoose document properties (ex: _id), schema 
     methods and virtuals; Mongoose objects returned by a query
  */
-interface AccountDocument extends Document, Account { }
+interface AccountDocument extends Document, Account { 
+    comparePassword: (comparative: string) => Promise<boolean>;
+}
 
 const AccountSchema = new Schema<AccountDocument, AccountModel>({
     createdOn: Date,
@@ -113,29 +121,78 @@ const AccountSchema = new Schema<AccountDocument, AccountModel>({
     oauth2Google: AccountOauth2GoogleSchema
 });
 
+/**
+ * 
+ * @param comparative user-provided value to compare against the hashed password
+ * @returns 
+ */
+AccountSchema.methods.comparePassword = async function(comparative: string): Promise<boolean> {
+    try {
+        /* 
+            This method should not be used if the account's auth method does not use a user-provided password.
+
+            Schema validation for password on 'default' auth method means the type-cast below can be done with 
+            more confidence: if auth method is default, password is required on the model and should not be undefined.
+        */
+        if (this.authMethod !== AccountAuthMethod.default) {
+            return false;
+        }
+
+        const result = await bcrypt.compare(comparative, (this.accountCredentials?.password as string));
+
+        return result ? true : false;
+
+    } catch (e) {
+        // TODO: log error
+        return false;
+    } 
+};
+
+/*
+    Defines Account mongoose model with static methods
+*/
 export interface AccountModel extends Model<AccountDocument> {
-    createWithDefaultCredentials: (args: Pick<Account, 'email'> & Pick<AccountDefaultCredentials, 'password'>) => Promise<AccountModel>;
-    createWithGoogleCredentials: (args: Pick<Account, 'email'> & AccountOauth2Google) => Promise<AccountModel>;
+    createWithDefaultCredentials: (args: Pick<Account, 'email'> & Pick<AccountDefaultCredentials, 'password'>) => Promise<AccountDocument | false>;
+    //createWithGoogleCredentials: (args: Pick<Account, 'email'> & AccountOauth2Google) => Promise<AccountModel>;
 }
 
+ /**
+  * Factory function for creating a new account document with default credentials
+  * @param param0
+  * @returns If document creation completed without error the newly created document is returned, otherwise return false
+  */
 AccountSchema.statics.createWithDefaultCredentials = async function ({ 
     email, 
     password
 }: Pick<Account, 'email'> & Pick<AccountDefaultCredentials, 'password'>
-): Promise<AccountDocument> {
-    const currentDate = new Date();
+): Promise<AccountDocument | false> {
+    try {
+        const currentDate = new Date();
 
-    return await this.create({  
-        createdOn: currentDate,
-        lastUpdatedOn: currentDate,
-        authMethod: AccountAuthMethod.default,
-        activityStatus: AccountActivityStatus.active,
-        email: email,
-        emailSendPermission: AccountEmailPermissions.true,
-        accountCredentials: {
-            password: password
-        }
-    });
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+
+        const newAccount = new this({  
+            createdOn: currentDate,
+            lastUpdatedOn: currentDate,
+            authMethod: AccountAuthMethod.default,
+            activityStatus: AccountActivityStatus.active,
+            email: email,
+            emailSendPermission: AccountEmailPermissions.true,
+            accountCredentials: {
+                password: hash
+            }
+        });
+
+        const result = await newAccount.save();
+
+        return result;
+
+    } catch (e) {
+        // TODO: log error
+
+        return false;
+    }
 }
 
 export default mongoose.model('Accounts', AccountSchema);

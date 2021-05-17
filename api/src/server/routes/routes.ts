@@ -9,7 +9,7 @@ export const auth = {
     // POST
     signup: `${accountsBase}/auth/signup`,
     // POST
-    signin: `${accountsBase}/atuh/signin`
+    signin: `${accountsBase}/auth/signin`
 }
 
 export const oauth2 = {
