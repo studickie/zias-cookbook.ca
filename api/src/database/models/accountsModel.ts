@@ -44,8 +44,7 @@ const AccountDefaultCredentialsSchema = new Schema({
     /*
         Password validation for database concerned only about it being filled/ not empty. 
 
-        Cannot be concerned with password formatting (checked in express middleware) because
-        the value should be hashed before it is added to a document.
+        Cannot be concerned with password formatting; value should be hashed before it is added to a document.
     */
     password: {
         type: String,
@@ -77,7 +76,7 @@ enum AccountActivityStatus {
     deactivated = 2
 }
 
-export interface Account {
+interface Account {
     createdOn: Date;
     lastUpdatedOn: Date;
     authMethod: AccountAuthMethod;
@@ -88,12 +87,15 @@ export interface Account {
     oauth2Google?: AccountOauth2Google;
 }
 
-/*
-    Defines Account object with mongoose document properties (ex: _id), schema 
-    methods and virtuals; Mongoose objects returned by a query
- */
 interface AccountDocument extends Document, Account { 
     comparePassword: (comparative: string) => Promise<boolean>;
+}
+
+interface AccountModel extends Model<AccountDocument> {
+    createWithDefaultCredentials: (args: {
+        email: string;
+        password: string;
+    }) => Promise<AccountDocument | false>;
 }
 
 const AccountSchema = new Schema<AccountDocument, AccountModel>({
@@ -130,15 +132,12 @@ AccountSchema.methods.comparePassword = async function(comparative: string): Pro
     try {
         /* 
             This method should not be used if the account's auth method does not use a user-provided password.
-
-            Schema validation for password on 'default' auth method means the type-cast below can be done with 
-            more confidence: if auth method is default, password is required on the model and should not be undefined.
         */
-        if (this.authMethod !== AccountAuthMethod.default) {
+        if (this.authMethod !== AccountAuthMethod.default || this.accountCredentials === undefined) {
             return false;
         }
 
-        const result = await bcrypt.compare(comparative, (this.accountCredentials?.password as string));
+        const result = await bcrypt.compare(comparative, this.accountCredentials.password);
 
         return result ? true : false;
 
@@ -148,36 +147,27 @@ AccountSchema.methods.comparePassword = async function(comparative: string): Pro
     } 
 };
 
-/*
-    Defines Account mongoose model with static methods
-*/
-export interface AccountModel extends Model<AccountDocument> {
-    createWithDefaultCredentials: (args: Pick<Account, 'email'> & Pick<AccountDefaultCredentials, 'password'>) => Promise<AccountDocument | false>;
-    //createWithGoogleCredentials: (args: Pick<Account, 'email'> & AccountOauth2Google) => Promise<AccountModel>;
-}
-
  /**
   * Factory function for creating a new account document with default credentials
   * @param param0
   * @returns If document creation completed without error the newly created document is returned, otherwise return false
   */
-AccountSchema.statics.createWithDefaultCredentials = async function ({ 
-    email, 
-    password
-}: Pick<Account, 'email'> & Pick<AccountDefaultCredentials, 'password'>
-): Promise<AccountDocument | false> {
+AccountSchema.statics.createWithDefaultCredentials = async function (args: {
+    email: string,
+    password: string,
+}): Promise<AccountDocument | false> {
     try {
         const currentDate = new Date();
-
+        
         const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt);
+        const hash = await bcrypt.hash(args.password, salt);
 
         const newAccount = new this({  
             createdOn: currentDate,
             lastUpdatedOn: currentDate,
             authMethod: AccountAuthMethod.default,
             activityStatus: AccountActivityStatus.active,
-            email: email,
+            email: args.email,
             emailSendPermission: AccountEmailPermissions.true,
             accountCredentials: {
                 password: hash

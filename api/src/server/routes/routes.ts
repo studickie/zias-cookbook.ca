@@ -1,22 +1,25 @@
 const accountsBase = '/accounts';
 
-export const accounts = {
-}
+export const accounts = { }
+
+const authBase = `${accountsBase}/auth`
 
 export const auth = {
     // POST
-    requestSignup: `${accountsBase}/auth/requestSignup`,
+    requestSignup: `${authBase}/requestSignup`,
     // POST
-    signup: `${accountsBase}/auth/signup`,
+    signup: `${authBase}/signup`,
     // POST
-    signin: `${accountsBase}/auth/signin`
+    signin: `${authBase}/signin`
 }
+
+const oauth2Base = `${accountsBase}/oauth2`;
 
 export const oauth2 = {
     // GET
-    googleUrl: `${accountsBase}/oauth2/google`,
+    googleUrl: `${oauth2Base}/google`,
     // POST
-    googleVerify: `${accountsBase}/oauth2/google`
+    googleVerify: `${oauth2Base}/google`
 }
 
 const recipesBase = `/recipes`;

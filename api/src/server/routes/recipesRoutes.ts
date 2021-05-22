@@ -2,6 +2,7 @@ import express from 'express';
 import catchAsync from '../helpers/catchAsync';
 import Recipes from '../../database/models/RecipesModel';
 import { recipes as routes } from './routes';
+import verifyTokenMiddleware from '../middleware/verifyTokenMiddleware';
 
 const router = express.Router();
 
@@ -9,33 +10,44 @@ const router = express.Router();
     Retrieves all recipes where the requesting account's id is listed in the 
     recipie's "authoredBy" or "subscribers" property
  */
-router.get(routes.find, catchAsync(async (req, res) => {
+router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res) => {
+    const recipes = await Recipes.find({ 
+        authoredBy: req.accountId 
+    });
 
-    return res.status(200).json({ });
+    return res.status(200).json({ recipes });
 }));
 
 /*
     Retrieves a single recipe where the recipie's id matches the search param and 
     the requesting account's id is listed in the recipie's "authoredBy" or "subscribers" property
  */
-router.get(routes.findOne, catchAsync(async (req, res) => {
+router.get(routes.findOne, verifyTokenMiddleware, catchAsync(async (req, res) => {
+    const recipe = await Recipes.findOne({
+        _id: req.params.recipeId,
+        authoredBy: req.accountId 
+    });
 
-    return res.status(200).json({ });
+    return res.status(200).json({ recipe });
 }));
 
 /*
     Creates a new recipe and set the requesting account's id as the recipie's
     "authoredBy" property
  */
-router.post(routes.insert, catchAsync(async (req, res) => {
-
-    // TODO: add sanitization to form fields
-
-    const recipe = await Recipes.create({
-        title: req.body.title
+router.post(routes.insert, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+    
+    const createdRecipe = await Recipes.createRecipe({
+        title: req.body.title,
+        authoredBy: req.accountId,
+        ingredients: req.body.ingredients
     });
 
-    return res.status(200).json({ recipe });
+    if (!createdRecipe) {
+        return next(new Error('Oops! Something went wrong'));
+    }
+
+    return res.status(200).json({ recipeId: createdRecipe._id });
 }));
 
 /*
@@ -44,9 +56,9 @@ router.post(routes.insert, catchAsync(async (req, res) => {
 
     Recipie properties which can be updated should be restricted to: title, subscribers
  */
-router.put(routes.update, catchAsync(async (req, res) => {
+router.put(routes.update, verifyTokenMiddleware, catchAsync(async (req, res) => {
 
-    return res.status(200).json({  });
+    return res.status(200);
 }));
 
 /*
@@ -57,9 +69,14 @@ router.put(routes.update, catchAsync(async (req, res) => {
     should not be able to be completely deleted from DB. This method should only serve to 
     remove an account from being subscribed to the recipie.
  */
-router.delete(routes.remove, catchAsync(async (req, res) => {
+router.delete(routes.remove, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+    const result = await Recipes.archiveRecipe(req.params.recipeId, req.accountId);
 
-    return res.status(200).json({  });
+    if (!result) {
+        return next(new Error('Oops! Something went wrong.'));
+    }
+
+    return res.status(200);
 }));
 
 export default router;

@@ -19,7 +19,7 @@ export interface IApplicationError extends Error {
     statusCode: ErrorStatusCode;
 }
 
-abstract class ApplicationError extends Error implements IApplicationError{
+abstract class ApplicationError extends Error implements IApplicationError {
     public isOpError: boolean;
     public statusCode: ErrorStatusCode;
 
@@ -50,14 +50,21 @@ abstract class ApplicationError extends Error implements IApplicationError{
 
 export class ErrorBadRequest extends ApplicationError {
 
-    constructor(message: string) {
-        super(ErrorStatusCode.badRequest, message);
+    constructor(message?: string) {
+        super(ErrorStatusCode.badRequest, message = 'Bad Request');
     }
 }
 
 export class ErrorNotFound extends ApplicationError {
 
-    constructor(message: string) {
-        super(ErrorStatusCode.notFound, message);
+    constructor(message?: string) {
+        super(ErrorStatusCode.notFound, message = 'Not Found');
+    }
+}
+
+export class ErrorUnauthorized extends ApplicationError {
+
+    constructor(message?: string) {
+        super(ErrorStatusCode.unauthorized, message = 'Unauthorized');
     }
 }
