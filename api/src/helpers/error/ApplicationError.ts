@@ -51,20 +51,20 @@ abstract class ApplicationError extends Error implements IApplicationError {
 export class ErrorBadRequest extends ApplicationError {
 
     constructor(message?: string) {
-        super(ErrorStatusCode.badRequest, message = 'Bad Request');
+        super(ErrorStatusCode.badRequest, message || 'Bad Request');
     }
 }
 
 export class ErrorNotFound extends ApplicationError {
 
     constructor(message?: string) {
-        super(ErrorStatusCode.notFound, message = 'Not Found');
+        super(ErrorStatusCode.notFound, message || 'Not Found');
     }
 }
 
 export class ErrorUnauthorized extends ApplicationError {
 
     constructor(message?: string) {
-        super(ErrorStatusCode.unauthorized, message = 'Unauthorized');
+        super(ErrorStatusCode.unauthorized, message || 'Unauthorized');
     }
 }

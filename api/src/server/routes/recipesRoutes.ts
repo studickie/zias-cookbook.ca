@@ -3,80 +3,113 @@ import catchAsync from '../helpers/catchAsync';
 import Recipes from '../../database/models/RecipesModel';
 import { recipes as routes } from './routes';
 import verifyTokenMiddleware from '../middleware/verifyTokenMiddleware';
+import { ErrorBadRequest } from '../../helpers/error/ApplicationError';
+import { 
+    recipeInsertFormValidation, 
+    recipeInsertFormValidationRules 
+} from '../middleware/recipeInsertFormValidationMiddleware';
+import { 
+    recipeUpdateFormValidation, 
+    recipeUpdateFormValidationRules 
+} from '../middleware/recipeUpdateFormValidationMiddleware';
 
 const router = express.Router();
 
 /*
-    Retrieves all recipes where the requesting account's id is listed in the 
-    recipie's "authoredBy" or "subscribers" property
- */
+    Requests involving a recipe's ingredients are used by the recipe's author
+    to make changes to the ingredient data of a recipe.
+
+    A recipe is requested, in every case, by using the recipe id provided in the request 
+    url and an account id which is available in the request.
+*/
+
+
+/* Retrieves all recipes */
 router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res) => {
     const recipes = await Recipes.find({ 
         authoredBy: req.accountId 
     });
 
-    return res.status(200).json({ recipes });
+    return res.status(200).json({ 
+        recipes: recipes 
+    });
 }));
 
-/*
-    Retrieves a single recipe where the recipie's id matches the search param and 
-    the requesting account's id is listed in the recipie's "authoredBy" or "subscribers" property
- */
+/* Retrieves a specific recipe */
 router.get(routes.findOne, verifyTokenMiddleware, catchAsync(async (req, res) => {
     const recipe = await Recipes.findOne({
         _id: req.params.recipeId,
         authoredBy: req.accountId 
     });
 
-    return res.status(200).json({ recipe });
+    return res.status(200).json({ 
+        recipe: recipe 
+    });
 }));
 
-/*
-    Creates a new recipe and set the requesting account's id as the recipie's
-    "authoredBy" property
- */
-router.post(routes.insert, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+/* Create and insert a new recipe */
+router.post(
+    routes.insert, 
+    verifyTokenMiddleware,
+    recipeInsertFormValidationRules(),
+    recipeInsertFormValidation,
+    catchAsync(async (req, res, next) => {
     
-    const createdRecipe = await Recipes.createRecipe({
+    const createdRecipe = new Recipes({
         title: req.body.title,
         authoredBy: req.accountId,
         ingredients: req.body.ingredients
     });
 
-    if (!createdRecipe) {
+    await createdRecipe.save();
+
+    if (!createdRecipe._id) {
         return next(new Error('Oops! Something went wrong'));
     }
 
-    return res.status(200).json({ recipeId: createdRecipe._id });
+    return res.status(200).json({ 
+        recipeId: createdRecipe._id 
+    });
 }));
 
 /*
-    Updates an existing recipe where the recipie's id matches the search param and 
-    the recipie's "authoredBy" property matches the id of the requesting account
+    Update an existing recipe
 
-    Recipie properties which can be updated should be restricted to: title, subscribers
+    Recipe properties which can be updated should be restricted to: title
  */
-router.put(routes.update, verifyTokenMiddleware, catchAsync(async (req, res) => {
+router.put(
+    routes.update, 
+    verifyTokenMiddleware, 
+    recipeUpdateFormValidationRules(),
+    recipeUpdateFormValidation,
+    catchAsync(async (req, res, next) => {
 
-    return res.status(200);
+    const result = await Recipes.updateOne({
+        _id: req.params.recipeId,
+        authoredBy: req.accountId
+    }, {
+        title: req.body.title
+    });
+
+    if (result.ok < 1 || result.nModified < 1) {
+        return next(new ErrorBadRequest());
+    }
+
+    return res.status(200).send();
 }));
 
-/*
-    Deletes an existing recipe where the recipie's id matches the search param and 
-    the recipie's "authoredBy" property matches the id of the requesting account
-
-    Supporting the ability for other accounts to subscribe to any recipie means a recipie
-    should not be able to be completely deleted from DB. This method should only serve to 
-    remove an account from being subscribed to the recipie.
- */
+/* Delete a recipe */
 router.delete(routes.remove, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
-    const result = await Recipes.archiveRecipe(req.params.recipeId, req.accountId);
+    const result = await Recipes.deleteOne({
+        _id: req.params.recipeId, 
+        authroedBy: req.accountId
+    });
 
     if (!result) {
         return next(new Error('Oops! Something went wrong.'));
     }
 
-    return res.status(200);
+    return res.status(200).send();
 }));
 
 export default router;

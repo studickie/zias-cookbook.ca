@@ -6,7 +6,7 @@ interface RecipeIngredient {
     measuringUnit: string;
 }
 
-interface RecipeIngredientDocument extends Document, RecipeIngredient { }
+export interface RecipeIngredientDocument extends Document, RecipeIngredient { }
 
 const IngredientSchema = new Schema<RecipeIngredientDocument>({
     measurement: Number,
@@ -17,17 +17,11 @@ const IngredientSchema = new Schema<RecipeIngredientDocument>({
     }
 });
 
-enum RecipeStatus {
-    active = 0,
-    archived = 1
-}
-
 interface Recipe {
     createdOn: Date,
-    lastUpdatedOn: Date,
+    lastUpdated: Date,
     title: string;
     authoredBy: string;
-    activeStatus: RecipeStatus;
     ingredients: RecipeIngredient[]
 }
 
@@ -42,14 +36,9 @@ interface RecipeDocument extends Document, Recipe {
     ingredients: Types.DocumentArray<RecipeIngredientDocument>
 }
 
-interface RecipeModel extends Model<RecipeDocument> { 
-    createRecipe: (recipe: Omit<Recipe, 'createdOn' | 'lastUpdatedOn' | 'activeStatus'>) => Promise<RecipeDocument | false>;
-    archiveRecipe: (recipeId: string, accountId: string) => Promise<boolean>;
-}
-
-const RecipeSchema = new Schema<RecipeDocument, RecipeModel>({
+const RecipeSchema = new Schema<RecipeDocument, Model<RecipeDocument>>({
     createdOn: Date,
-    lastUpdatedOn: Date,
+    lastUpdated: Date,
     title: {
         type: String,
         required: [true, 'Provide a title for the recipe']
@@ -59,60 +48,32 @@ const RecipeSchema = new Schema<RecipeDocument, RecipeModel>({
         ref: 'Accounts',
         required: [true, 'Assign an author to the recipe']
     },
-    activeStatus: {
-        type: Number,
-        enum: [0, 1]
-    },
     ingredients: [IngredientSchema]
 });
 
-RecipeSchema.statics.archiveRecipe = async function(
-    recipeId: string,
-    accountId: string
-): Promise<boolean> {
-    try {
-        const result = await this.updateOne({
-            _id: recipeId,
-            authoredBy: accountId
-        }, {
-            activeStatus: RecipeStatus.archived,
-            updatedOn: new Date() 
-        });
+/**
+ * Schema on-save middleware sets createdOn and lastUpdated document properties to current date
+ */
+RecipeSchema.pre('save', function(next) {
+    const currentDate = new Date();
+    
+    this.set({
+        lastUpdated: currentDate,
+        createdOn: (this.isNew) ? currentDate : this.createdOn
+    });
 
-        return (result.ok && result.nModified > 0)
-            ? true
-            : false;
+    return next();
+});
 
-    } catch (e) {
-        // TODO: log error
+/**
+ * Schema on-updateOne middleware sets lastUpated document property to current date
+ */
+RecipeSchema.pre('updateOne', function(next) {
+    this.set({ 
+        lastUpdated: new Date()
+    });
 
-        return false;
-    }
-}
-
-RecipeSchema.statics.createRecipe = async function(
-    recipe: Omit<Recipe, 'createdOn' | 'lastUpdatedOn' | 'activeStatus'>
-): Promise<RecipeDocument | false> {
-    try {
-        const currentDate = new Date();
-
-        const recipeDoc = new this({
-            createdOn: currentDate,
-            lastUpdatedOn: currentDate,
-            title: recipe.title,
-            authoredBy: recipe.authoredBy,
-            status: RecipeStatus.active,
-            ingredients: recipe.ingredients
-        });
-
-        const result = recipeDoc.save();
-
-        return result;
-
-    } catch (e) {
-        // TODO: log error
-        return false;
-    }
-}
+    return next();
+});
 
 export default mongoose.model('Recipes', RecipeSchema);
