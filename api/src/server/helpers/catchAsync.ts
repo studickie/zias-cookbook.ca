@@ -11,7 +11,10 @@ function catchAsync(fn: (req: Request, res: Response, next: NextFunction) => Pro
         try {   
             return await fn(req, res, next);
         } catch (e) {
+            // TODO: log request error as "warning" if is system-generated error; "error" otherwise
             return next(e);
+        } finally {
+            // TODO: log request as "debug" level while NODE_ENV === 'development'
         }
     };
 }

@@ -2,9 +2,9 @@ import express from 'express';
 import catchAsync from '../helpers/catchAsync';
 import Recipes from '../../database/models/RecipesModel';
 import { recipes as routes } from './routes';
+import { ErrorBadRequest } from '../../helpers/ApplicationError';
 import verifyTokenMiddleware from '../middleware/verifyTokenMiddleware';
-import { ErrorBadRequest } from '../../helpers/error/ApplicationError';
-import { 
+import {
     recipeInsertFormValidation, 
     recipeInsertFormValidationRules 
 } from '../middleware/recipeInsertFormValidationMiddleware';
@@ -12,9 +12,12 @@ import {
     recipeUpdateFormValidation, 
     recipeUpdateFormValidationRules 
 } from '../middleware/recipeUpdateFormValidationMiddleware';
+import { GetRecipesRequest } from '../../entities/GetRecipesRequest';
+import { CreateRecipeRequest } from '../../entities/CreateRecipeRequest';
+import { CreateRecipeResponse } from '../../entities/CreateRecipeResponse';
+import { UpdateRecipeRequest } from '../../entities/UpdateRecipeRequest';
 
 const router = express.Router();
-
 /*
     Requests involving a recipe's ingredients are used by the recipe's author
     to make changes to the ingredient data of a recipe.
@@ -23,11 +26,22 @@ const router = express.Router();
     url and an account id which is available in the request.
 */
 
+/*
+    Retrieves all recipes 
 
-/* Retrieves all recipes */
+    Supports:
+    - search by ingredient keyword
+    - filter by category
+*/
 router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res) => {
-    const recipes = await Recipes.find({ 
-        authoredBy: req.accountId 
+    const { 
+        searchKeyword, 
+        category 
+    }: GetRecipesRequest = req.body;
+
+    const recipes = await Recipes.search(req.accountId, {
+        searchKeyword,
+        category
     });
 
     return res.status(200).json({ 
@@ -54,11 +68,14 @@ router.post(
     recipeInsertFormValidationRules(),
     recipeInsertFormValidation,
     catchAsync(async (req, res, next) => {
+
+    const { title, ingredients, category }: CreateRecipeRequest = req.body;
     
     const createdRecipe = new Recipes({
-        title: req.body.title,
+        title: title,
         authoredBy: req.accountId,
-        ingredients: req.body.ingredients
+        ingredients: ingredients,
+        category: category
     });
 
     await createdRecipe.save();
@@ -67,9 +84,11 @@ router.post(
         return next(new Error('Oops! Something went wrong'));
     }
 
-    return res.status(200).json({ 
+    const response: CreateRecipeResponse = {
         recipeId: createdRecipe._id 
-    });
+    };
+
+    return res.status(200).json(response);
 }));
 
 /*
@@ -84,12 +103,19 @@ router.put(
     recipeUpdateFormValidation,
     catchAsync(async (req, res, next) => {
 
+    const updateObj = Object.keys(req.body).reduce<UpdateRecipeRequest>((acc, key) => {
+        return {
+            ...acc,
+            ...{
+                [key]: req.body[key]
+            }
+        };
+    }, {});
+
     const result = await Recipes.updateOne({
         _id: req.params.recipeId,
         authoredBy: req.accountId
-    }, {
-        title: req.body.title
-    });
+    }, updateObj);
 
     if (result.ok < 1 || result.nModified < 1) {
         return next(new ErrorBadRequest());

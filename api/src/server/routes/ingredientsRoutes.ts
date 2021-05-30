@@ -2,7 +2,7 @@ import express from 'express';
 import { ingredients as routes } from './routes';
 import catchAsync from '../helpers/catchAsync';
 import Recipes from '../../database/models/RecipesModel';
-import { ErrorNotFound } from '../../helpers/error/ApplicationError';
+import { ErrorNotFound } from '../../helpers/ApplicationError';
 import verifyTokenMiddleware from '../middleware/verifyTokenMiddleware';
 import {
     ingredientInsertFormValidation,

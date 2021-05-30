@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, ValidationChain, validationResult } from 'express-validator';
-import { ErrorBadRequest } from '../../helpers/error/ApplicationError';
+import { ErrorBadRequest } from '../../helpers/ApplicationError';
 
 export function recipeInsertFormValidationRules(): ValidationChain[] {
     return [
-        body('title').exists().trim().notEmpty().blacklist('@#$%^_-{}[]`'),
-        body('ingredients.*.item').exists().trim().notEmpty().blacklist('@#$%^_-{}[]`'),
-        body('ingredients.*.measurement').if(body('ingredients.*.measurement').exists()).trim().notEmpty().isInt(),
-        body('ingredients.*.measuringUnit').if(body('ingredients.*.measurement').exists()).trim().notEmpty().blacklist('@#$%^_-{}[]`')
+        body('title').trim().notEmpty().blacklist('@#$%^_-{}[]`'),
+        body('category').isInt(),
+        body('ingredients.*.item').trim().notEmpty().blacklist('@#$%^_-{}[]`'),
+        body('ingredients.*.measurement').isInt(),
+        body('ingredients.*.measuringUnit').trim().notEmpty().blacklist('@#$%^_-{}[]`')
     ];
 }
 

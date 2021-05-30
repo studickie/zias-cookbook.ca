@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, ValidationChain, validationResult } from 'express-validator';
-import { ErrorBadRequest } from '../../helpers/error/ApplicationError';
+import { ErrorBadRequest } from '../../helpers/ApplicationError';
 
 export function authFormValidationRules(): ValidationChain[] {
     return [

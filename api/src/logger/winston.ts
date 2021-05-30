@@ -44,7 +44,21 @@ const options = {
     }
 }
 
+const logLevels: Record<string, number> = { 
+    emerg: 0,
+    alert: 1,
+    crit: 2,
+    error: 3,
+    warning: 4,
+    // reports system events e.g.: new account, email sent, etc.
+    notice: 5,
+    info: 6,
+    // reports on app actions in a development environment
+    debug: 7
+};
+
 const logger = createLogger({
+    levels: logLevels,
     transports: [
         new transports.File(options.file)
     ]

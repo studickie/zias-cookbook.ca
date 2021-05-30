@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { GetRecipesRequest } from '../../entities/GetRecipesRequest';
 
-interface RecipeIngredient {
+export interface RecipeIngredient {
     item: string;
     measurement: number;
     measuringUnit: string;
@@ -17,26 +18,38 @@ const IngredientSchema = new Schema<RecipeIngredientDocument>({
     }
 });
 
-interface Recipe {
+export enum RecipeCategories {
+    none = 0,
+    breakfast = 1,
+    lunch = 2,
+    dinner = 3,
+    dessert = 4,
+    appetizer = 5,
+    snack = 6
+}
+
+export interface Recipe {
     createdOn: Date,
     lastUpdated: Date,
     title: string;
     authoredBy: string;
-    ingredients: RecipeIngredient[]
+    ingredients: RecipeIngredient[],
+    category: RecipeCategories
 }
 
 interface RecipeDocument extends Document, Recipe { 
     /*
-        Re-declare the typing of the ingredients property to allow access to the methods included
-        in the the object returned by a mongoose query; the "document" type of the sub-document.
-
-        Without this step: mongoose-included searches on sub-documents (e.g.: .id()) are not recogonized
-        by TypeScript.
+        Re-declare the typing of properties which are mongoose sub-documents to identify 
+        returned types as mongoose document 
     */
     ingredients: Types.DocumentArray<RecipeIngredientDocument>
 }
 
-const RecipeSchema = new Schema<RecipeDocument, Model<RecipeDocument>>({
+interface RecipeModel extends Model<RecipeDocument> {
+    search: (accountId: string, filters: unknown) => Promise<RecipeDocument[]>;
+}
+
+const RecipeSchema = new Schema<RecipeDocument, RecipeModel>({
     createdOn: Date,
     lastUpdated: Date,
     title: {
@@ -48,7 +61,11 @@ const RecipeSchema = new Schema<RecipeDocument, Model<RecipeDocument>>({
         ref: 'Accounts',
         required: [true, 'Assign an author to the recipe']
     },
-    ingredients: [IngredientSchema]
+    ingredients: [IngredientSchema],
+    category: {
+        type: Number,
+        enum: [0, 1, 2, 3, 4, 5, 6]
+    }
 });
 
 /**
@@ -75,5 +92,38 @@ RecipeSchema.pre('updateOne', function(next) {
 
     return next();
 });
+
+/**
+ * 
+ * @param accountId 
+ * @param filters 
+ */
+RecipeSchema.statics.search = async function(accountId: string, filters: GetRecipesRequest): Promise<RecipeDocument[]> {
+    let query = {
+        authoredBy: accountId
+    };
+
+    if (filters.searchKeyword) {
+        query = {
+            ...query,
+            ...{
+                'ingredients.item': filters.searchKeyword
+            }
+        };
+    }
+
+    if (filters.category) {
+        query = {
+            ...query,
+            ...{
+                'category': filters.category
+            }
+        };
+    }
+
+    const result = await this.find(query);
+
+    return result;
+}
 
 export default mongoose.model('Recipes', RecipeSchema);

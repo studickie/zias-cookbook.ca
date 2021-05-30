@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ErrorUnauthorized } from '../../helpers/error/ApplicationError';
+import { ErrorUnauthorized } from '../../helpers/ApplicationError';
 import jwToken from '../../helpers/jwToken';
 
 export default function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction): void {

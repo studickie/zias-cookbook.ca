@@ -1,7 +1,7 @@
 import express from 'express';
 import { authFormValidationMiddleware, authFormValidationRules } from '../middleware/authFormValidationMiddleware';
 import catchAsync from '../helpers/catchAsync';
-import { ErrorBadRequest } from '../../helpers/error/ApplicationError';
+import { ErrorBadRequest } from '../../helpers/ApplicationError';
 import jwToken from '../../helpers/jwToken';
 import { auth as routes } from './routes';
 import Accounts from '../../database/models/AccountsModel';
@@ -12,7 +12,11 @@ const router = express.Router();
 /*
     Create an account with the default authentication strategy
 */
-router.post(routes.signup, authFormValidationRules(), authFormValidationMiddleware, catchAsync(async (req, res, next) => {
+router.post(
+    routes.signup, 
+    authFormValidationRules(), 
+    authFormValidationMiddleware, 
+    catchAsync(async (req, res, next) => {
 
     const { email, password } = req.body;
 
@@ -28,6 +32,8 @@ router.post(routes.signup, authFormValidationRules(), authFormValidationMiddlewa
         return next(new Error('Oops! Something went wrong.'));
     }
 
+    // TODO: log account creation event as "info" level
+
     const jwt = jwToken.generate({
         account: createdAccount._id
     });
@@ -41,7 +47,11 @@ router.post(routes.signup, authFormValidationRules(), authFormValidationMiddlewa
 /*
     Validate user credentials as the default authentication strategy
 */
-router.post(routes.signin, authFormValidationRules(), authFormValidationMiddleware, catchAsync(async (req, res, next) => {
+router.post(
+    routes.signin, 
+    authFormValidationRules(), 
+    authFormValidationMiddleware, 
+    catchAsync(async (req, res, next) => {
 
     const { email, password } = req.body;
 

@@ -19,7 +19,7 @@ export default async function databaseLoader(): Promise<void> {
         });
         
     } catch (e) {
-        // TODO: log error
+        // TODO: log as error level 'crit'
 
         process.exit(1);
     }

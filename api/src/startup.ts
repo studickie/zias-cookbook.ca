@@ -8,7 +8,7 @@ import recipesRoutes from './server/routes/recipesRoutes';
 import ingredientsRoutes from './server/routes/ingredientsRoutes';
 //import recipesRoutes from './server/routes/recipesRoutes';
 import databaseLoader from './database';
-import { ErrorNotFound, IApplicationError } from './helpers/error/ApplicationError';
+import { ErrorNotFound, IApplicationError } from './helpers/ApplicationError';
 
 async function startup() {
     try {
@@ -47,7 +47,7 @@ async function startup() {
         });
 
     } catch (e) {
-        // TODO: log error
+        // TODO: log failure to load as "crit" level
 
         process.exit(1);
     }
