@@ -4,7 +4,7 @@ import catchAsync from '../helpers/catchAsync';
 import { ErrorBadRequest } from '../../helpers/ApplicationError';
 import jwToken from '../../helpers/jwToken';
 import { auth as routes } from './routes';
-import Accounts from '../../database/models/AccountsModel';
+import Accounts from '../../database/mongooseModels/AccountsModel';
 //import MailerService from '../../services/MailerService';
 
 const router = express.Router();

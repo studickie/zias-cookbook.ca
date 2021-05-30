@@ -5,7 +5,8 @@ import { ErrorBadRequest } from '../../helpers/ApplicationError';
 export function recipeInsertFormValidationRules(): ValidationChain[] {
     return [
         body('title').trim().notEmpty().blacklist('@#$%^_-{}[]`'),
-        body('category').isInt(),
+        // TODO: add better check on array items
+        body('categories').isArray({ min: 0 }),
         body('ingredients.*.item').trim().notEmpty().blacklist('@#$%^_-{}[]`'),
         body('ingredients.*.measurement').isInt(),
         body('ingredients.*.measuringUnit').trim().notEmpty().blacklist('@#$%^_-{}[]`')

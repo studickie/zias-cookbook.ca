@@ -9,14 +9,15 @@ export function recipeUpdateFormValidationRules(): ValidationChain[] {
 
             if (keys.length < 1) return false;
             
-            const result = keys.filter(key => ['title', 'category'].indexOf(key) < 0);
+            const result = keys.filter(key => ['title', 'categories'].indexOf(key) < 0);
 
             if (result.length > 0) return false;
 
             return true;
         }),
         body('title').if(body('title').exists()).trim().notEmpty().blacklist('@#$%^_-{}[]`'),
-        body('category').if(body('category').exists()).isInt()
+        // TODO: add better check on array items
+        body('categories').if(body('categories').exists()).isArray({min: 1})
     ];
 }
 

@@ -1,4 +1,4 @@
-import { RecipeCategories } from '../database/models/RecipesModel';
+import { RecipeCategories } from '../database/mongooseModels/RecipesModel';
 
 export interface GetRecipesRequest {
     searchKeyword: string;

@@ -1,7 +1,7 @@
 import express from 'express';
 import { oauth2 } from './routes';
 import catchAsync from '../helpers/catchAsync';
-import Accounts from '../../database/models/AccountsModel';
+import Accounts from '../../database/mongooseModels/AccountsModel';
 import jwToken from '../../helpers/jwToken';
 import googleService from '../../services/GoogleService';
 

@@ -1,18 +1,13 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { Account } from '../../models/Account';
 
 /* 
     -------------------------------------------
     Account Google Oauth2 sub-document schema
 */
 
-interface AccountOauth2Google {
-    googleId: string;
-    googleToken: string;
-    googleRef?: string;
-}
-
-const AccountOauth2GoogleSchema = new Schema({
+const accountOauth2GoogleSchema = new Schema({
     googleId: {
         type: String,
         required: [true, 'Required field "googleId" not provided.'],
@@ -36,11 +31,7 @@ const AccountOauth2GoogleSchema = new Schema({
     Account default credentials sub-document schema
 */
 
-interface AccountDefaultCredentials {
-    password: string;
-}
-
-const AccountDefaultCredentialsSchema = new Schema({
+const accountDefaultCredentialsSchema = new Schema({
     /*
         Password validation for database concerned only about it being filled/ not empty. 
 
@@ -76,16 +67,7 @@ enum AccountActivityStatus {
     deactivated = 2
 }
 
-interface Account {
-    createdOn: Date;
-    lastUpdatedOn: Date;
-    authMethod: AccountAuthMethod;
-    activityStatus: AccountActivityStatus;
-    email: string;
-    emailSendPermission: AccountEmailPermissions;
-    accountCredentials?: AccountDefaultCredentials,
-    oauth2Google?: AccountOauth2Google;
-}
+
 
 interface AccountDocument extends Document, Account { 
     comparePassword: (comparative: string) => Promise<boolean>;
@@ -98,7 +80,7 @@ interface AccountModel extends Model<AccountDocument> {
     }) => Promise<AccountDocument | false>;
 }
 
-const AccountSchema = new Schema<AccountDocument, AccountModel>({
+const accountSchema = new Schema<AccountDocument, AccountModel>({
     createdOn: Date,
     lastUpdatedOn: Date,
     authMethod: {
@@ -119,19 +101,20 @@ const AccountSchema = new Schema<AccountDocument, AccountModel>({
         enum: [0, 1],
         default: 0
     },
-    accountCredentials: AccountDefaultCredentialsSchema,
-    oauth2Google: AccountOauth2GoogleSchema
+    accountCredentials: accountDefaultCredentialsSchema,
+    oauth2Google: accountOauth2GoogleSchema
 });
 
 /**
- * 
- * @param comparative user-provided value to compare against the hashed password
- * @returns 
+ * Compares user-provided string to stored password hash for sign-in process
+ * @param comparative user-provided string to compare against the hashed password
+ * @returns
  */
-AccountSchema.methods.comparePassword = async function(comparative: string): Promise<boolean> {
+accountSchema.methods.comparePassword = async function(comparative: string): Promise<boolean> {
     try {
         /* 
-            This method should not be used if the account's auth method does not use a user-provided password.
+            This method should not be used if the account's auth method does not use a 
+            user-provided password.
         */
         if (this.authMethod !== AccountAuthMethod.default || this.accountCredentials === undefined) {
             return false;
@@ -150,9 +133,9 @@ AccountSchema.methods.comparePassword = async function(comparative: string): Pro
  /**
   * Factory function for creating a new account document with default credentials
   * @param param0
-  * @returns If document creation completed without error the newly created document is returned, otherwise return false
+  * @returns newly created document
   */
-AccountSchema.statics.createWithDefaultCredentials = async function (args: {
+accountSchema.statics.createWithDefaultCredentials = async function (args: {
     email: string,
     password: string,
 }): Promise<AccountDocument | false> {
@@ -185,4 +168,4 @@ AccountSchema.statics.createWithDefaultCredentials = async function (args: {
     }
 }
 
-export default mongoose.model('Accounts', AccountSchema);
+export default mongoose.model('Accounts', accountSchema);

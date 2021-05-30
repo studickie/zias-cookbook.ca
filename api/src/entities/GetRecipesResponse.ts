@@ -1,3 +1,5 @@
+import { Recipe } from '../models/Recipe';
+
 export interface GetRecipesResponse {
-    recipe: unknown;
+    recipes: Recipe[];
 }

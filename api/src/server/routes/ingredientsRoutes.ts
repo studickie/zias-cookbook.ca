@@ -1,7 +1,7 @@
 import express from 'express';
 import { ingredients as routes } from './routes';
 import catchAsync from '../helpers/catchAsync';
-import Recipes from '../../database/models/RecipesModel';
+import Recipes from '../../database/mongooseModels/RecipesModel';
 import { ErrorNotFound } from '../../helpers/ApplicationError';
 import verifyTokenMiddleware from '../middleware/verifyTokenMiddleware';
 import {
@@ -12,7 +12,7 @@ import {
     ingredientUpdateFormValidation,
     ingredientUpdateFormValidationRules
 } from '../middleware/ingredientUpdateFormValidationMiddleware';
-import { RecipeIngredientDocument } from '../../database/models/RecipesModel';
+import { RecipeIngredientDocument } from '../../database/mongooseModels/RecipesModel';
 
 const router = express.Router();
 

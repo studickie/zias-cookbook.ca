@@ -1,21 +1,22 @@
 import express from 'express';
 import catchAsync from '../helpers/catchAsync';
-import Recipes from '../../database/models/RecipesModel';
+import Recipes from '../../database/mongooseModels/RecipesModel';
 import { recipes as routes } from './routes';
 import { ErrorBadRequest } from '../../helpers/ApplicationError';
 import verifyTokenMiddleware from '../middleware/verifyTokenMiddleware';
 import {
-    recipeInsertFormValidation, 
-    recipeInsertFormValidationRules 
+    recipeInsertFormValidation,
+    recipeInsertFormValidationRules
 } from '../middleware/recipeInsertFormValidationMiddleware';
-import { 
-    recipeUpdateFormValidation, 
-    recipeUpdateFormValidationRules 
+import {
+    recipeUpdateFormValidation,
+    recipeUpdateFormValidationRules
 } from '../middleware/recipeUpdateFormValidationMiddleware';
-import { GetRecipesRequest } from '../../entities/GetRecipesRequest';
+import { GetRecipesResponse } from '../../entities/GetRecipesResponse';
+import { GetRecipeResponse } from '../../entities/GetRecipeResponse';
 import { CreateRecipeRequest } from '../../entities/CreateRecipeRequest';
 import { CreateRecipeResponse } from '../../entities/CreateRecipeResponse';
-import { UpdateRecipeRequest } from '../../entities/UpdateRecipeRequest';
+//import { UpdateRecipeRequest } from '../../entities/UpdateRecipeRequest';
 
 const router = express.Router();
 /*
@@ -26,108 +27,90 @@ const router = express.Router();
     url and an account id which is available in the request.
 */
 
-/*
-    Retrieves all recipes 
-
-    Supports:
-    - search by ingredient keyword
-    - filter by category
-*/
+/* Retrieves all recipes */
 router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res) => {
-    const { 
-        searchKeyword, 
-        category 
-    }: GetRecipesRequest = req.body;
+    // TODO: add form validation for search params
+    const recipes = await Recipes.search(req.accountId, req.body);
 
-    const recipes = await Recipes.search(req.accountId, {
-        searchKeyword,
-        category
-    });
+    const responseBody: GetRecipesResponse = {
+        recipes: recipes
+    };
 
-    return res.status(200).json({ 
-        recipes: recipes 
-    });
+    return res.status(200).json(responseBody);
 }));
 
 /* Retrieves a specific recipe */
 router.get(routes.findOne, verifyTokenMiddleware, catchAsync(async (req, res) => {
+
     const recipe = await Recipes.findOne({
         _id: req.params.recipeId,
-        authoredBy: req.accountId 
+        authoredBy: req.accountId
     });
 
-    return res.status(200).json({ 
-        recipe: recipe 
-    });
+    const responseBody: GetRecipeResponse = {
+        recipe: recipe
+    };
+
+    return res.status(200).json(responseBody);
 }));
 
 /* Create and insert a new recipe */
 router.post(
-    routes.insert, 
+    routes.insert,
     verifyTokenMiddleware,
     recipeInsertFormValidationRules(),
     recipeInsertFormValidation,
     catchAsync(async (req, res, next) => {
 
-    const { title, ingredients, category }: CreateRecipeRequest = req.body;
-    
-    const createdRecipe = new Recipes({
-        title: title,
-        authoredBy: req.accountId,
-        ingredients: ingredients,
-        category: category
-    });
+        const { title, ingredients, categories }: CreateRecipeRequest = req.body;
 
-    await createdRecipe.save();
+        const createdRecipe = new Recipes({
+            title: title,
+            authoredBy: req.accountId,
+            ingredients: ingredients,
+            categories: categories
+        });
 
-    if (!createdRecipe._id) {
-        return next(new Error('Oops! Something went wrong'));
-    }
+        await createdRecipe.save();
 
-    const response: CreateRecipeResponse = {
-        recipeId: createdRecipe._id 
-    };
+        if (!createdRecipe._id) {
+            return next(new Error('Oops! Something went wrong'));
+        }
 
-    return res.status(200).json(response);
-}));
+        const responseBody: CreateRecipeResponse = {
+            recipeId: createdRecipe._id
+        };
 
-/*
-    Update an existing recipe
+        return res.status(200).json(responseBody);
+    })
+);
 
-    Recipe properties which can be updated should be restricted to: title
- */
+/* Update an existing recipe */
 router.put(
-    routes.update, 
-    verifyTokenMiddleware, 
+    routes.update,
+    verifyTokenMiddleware,
     recipeUpdateFormValidationRules(),
     recipeUpdateFormValidation,
     catchAsync(async (req, res, next) => {
 
-    const updateObj = Object.keys(req.body).reduce<UpdateRecipeRequest>((acc, key) => {
-        return {
-            ...acc,
-            ...{
-                [key]: req.body[key]
-            }
-        };
-    }, {});
+        const result = await Recipes.updateOne({
+            _id: req.params.recipeId,
+            authoredBy: req.accountId
+        }, req.body);
+        
+        if (result.ok < 1 || result.nModified < 1) {
+            return next(new ErrorBadRequest());
+        }
 
-    const result = await Recipes.updateOne({
-        _id: req.params.recipeId,
-        authoredBy: req.accountId
-    }, updateObj);
-
-    if (result.ok < 1 || result.nModified < 1) {
-        return next(new ErrorBadRequest());
-    }
-
-    return res.status(200).send();
-}));
+        return res.status(200).send();
+    })
+);
 
 /* Delete a recipe */
 router.delete(routes.remove, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+
     const result = await Recipes.deleteOne({
-        _id: req.params.recipeId, 
+        _id: req.params.recipeId,
         authroedBy: req.accountId
     });
 
