@@ -3,7 +3,7 @@ import Mail from 'nodemailer/lib/mailer';
 
 import path from 'path';
 import fs from 'fs';
-import logger from '../logger/winston';
+import logger from '../helpers/logger';
 
 const mailHost = process.env.MAIL_HOST;
 const mailUser = process.env.MAIL_USER;

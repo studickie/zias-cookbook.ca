@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import logger from '../../logger/winston';
+import logger from '../../helpers/logger';
 
 /**
  * Catches promise rejections in Express.js routes and middleware

@@ -9,7 +9,7 @@ import ingredientsRoutes from './server/routes/ingredientsRoutes';
 //import recipesRoutes from './server/routes/recipesRoutes';
 import databaseLoader from './database';
 import { ErrorNotFound, IApplicationError } from './helpers/ApplicationError';
-import logger from './logger/winston';
+import logger from './helpers/logger';
 
 async function startup() {
     try {

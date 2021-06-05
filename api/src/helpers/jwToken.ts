@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import logger from '../logger/winston';
+import logger from '../helpers/logger';
 
 const secret = process.env.SECRET;
 

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import logger from '../logger/winston';
+import logger from '../helpers/logger';
 
 const dbHost = process.env.DB_HOST || '';
 const dbName = process.env.DB_NAME || '';
