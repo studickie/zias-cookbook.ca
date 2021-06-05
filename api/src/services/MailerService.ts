@@ -3,6 +3,7 @@ import Mail from 'nodemailer/lib/mailer';
 
 import path from 'path';
 import fs from 'fs';
+import logger from '../logger/winston';
 
 const mailHost = process.env.MAIL_HOST;
 const mailUser = process.env.MAIL_USER;
@@ -44,7 +45,7 @@ class MailerService {
         })
         .then(value => {
             // TODO: replace emailTo address with environment variable
-            this.sendEmail('studickiecodes@gmail.com', 'New account request', value);
+            console.log('send mail')
         })
         .catch(error => {
             //TODO: log error
@@ -77,9 +78,10 @@ class MailerService {
             return;
 
         } catch (e) {
-            // TODO: log error
+            logger.error(e);
 
             return;
+
         } finally {
             // TODO: log email event
         }

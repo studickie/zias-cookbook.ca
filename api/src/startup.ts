@@ -9,6 +9,7 @@ import ingredientsRoutes from './server/routes/ingredientsRoutes';
 //import recipesRoutes from './server/routes/recipesRoutes';
 import databaseLoader from './database';
 import { ErrorNotFound, IApplicationError } from './helpers/ApplicationError';
+import logger from './logger/winston';
 
 async function startup() {
     try {
@@ -33,12 +34,22 @@ async function startup() {
 
         app.use('*', (req, res, next) => next(new ErrorNotFound('Invalid Request')));
 
-        app.use((err: IApplicationError, req: Request, res: Response, next: NextFunction) => (
+        app.use((err: IApplicationError, req: Request, res: Response, next: NextFunction) => {
+
+            logger.warn({
+                method: req.method,
+                pathname: req.path,
+                status: err.statusCode || null,
+                name: err.name,
+                message: err.message,
+                trace: err.stack
+            });
+
             res.status(err.statusCode || 500).json({
                 name: err.name,
                 message: err.message
-            })
-        ));
+            });
+        });
 
         const port = process.env.PORT || 3000;
 
@@ -46,8 +57,8 @@ async function startup() {
             console.log(`App listening on port ${port}`);
         });
 
-    } catch (e) {
-        // TODO: log failure to load as "crit" level
+    } catch (error) {
+        logger.error(error);
 
         process.exit(1);
     }

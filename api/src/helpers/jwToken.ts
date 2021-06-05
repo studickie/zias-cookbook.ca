@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import logger from '../logger/winston';
 
 const secret = process.env.SECRET;
 
@@ -23,7 +24,7 @@ function jwToken(): {
             )
         };
     } catch (e) {
-        // TODO: log error
+        logger.error(e);
 
         process.exit(1);
     }

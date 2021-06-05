@@ -1,6 +1,6 @@
 import path from 'path';
-import { createLogger, format, transports } from 'winston';
-const { combine, colorize, json, timestamp, printf, label } = format;
+import { createLogger, format, transport, transports } from 'winston';
+//const { combine, colorize, json, timestamp, printf, label } = format;
 
 /*
 *   Winston docs: npmjs.com/package/winston
@@ -11,61 +11,38 @@ const { combine, colorize, json, timestamp, printf, label } = format;
 *       -> github.com/winstonjs/logform
 */
 
-const appRoot = process.env.NODE_PATH || path.resolve(__dirname, '../../');
+const appRoot = process.env.NODE_PATH || '';
 
-const consoleFormat = printf(({ label, message, stack }) => {
-    return `
-    [${label}]: ${message}
-    ${stack}
-    `;
-});
-
-const options = {
-    file: {
-        level: 'error',
-        filename: `${appRoot}/logs/app.log`,
-        handleExceptions: true,
-        format: combine(
-            label({ label: 'ERROR'}),
-            timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-            json()
-        ),
-        maxsize: 5242880, // 5MB
-        maxFiles: 5,
-    },
-    console: {
-        level: 'error',
-        handleExceptions: false,
-        format: combine(
-            label({ label: 'ERROR'}),
-            colorize({ colors: { error: 'red' } }),
-            consoleFormat
-        )
+/*
+    Log levels
+    { 
+        error: 0,
+        warn: 1,
+        info: 2,
+        http: 3,
+        verbose: 4,
+        debug: 5,
+        silly: 6
     }
-}
-
-const logLevels: Record<string, number> = { 
-    emerg: 0,
-    alert: 1,
-    crit: 2,
-    error: 3,
-    warning: 4,
-    // reports system events e.g.: new account, email sent, etc.
-    notice: 5,
-    info: 6,
-    // reports on app actions in a development environment
-    debug: 7
-};
+*/
 
 const logger = createLogger({
-    levels: logLevels,
     transports: [
-        new transports.File(options.file)
+        new transports.File({
+            filename: path.join(appRoot, 'logs/error.log'),
+            level: 'error',
+            format: format.json()
+        }),
+        new transports.File({
+            filename: path.join(appRoot, 'log/debug.log'),
+            level: 'debug',
+            format: format.json()
+        })
     ]
 });
 
-if (process.env.NODE_ENV != 'production') {
-    logger.add(new transports.Console(options.console));
-}
+// if (process.env.NODE_ENV != 'production') {
+//     logger.add(new transports.Console(options.console));
+// }
 
 export default logger;
