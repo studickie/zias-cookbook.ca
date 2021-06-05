@@ -1,9 +1,5 @@
-// import { Db } from "mongodb";
-
-// declare global {
-//     namespace Express {
-//         interface Request {
-//             //dbContext: Db
-//         }
-//     }
-// }
+declare namespace Express {
+    export interface Request {
+        accountId: string;
+    }
+}

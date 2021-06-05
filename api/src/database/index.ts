@@ -1,14 +1,28 @@
-import { MongoClient, Db } from 'mongodb';
+import mongoose from 'mongoose';
+import logger from '../helpers/logger';
 
-export type AccessConstructor = <T>(Repo: new (db: Db) => T) => InstanceType<typeof Repo>;
+const dbHost = process.env.DB_HOST || '';
+const dbName = process.env.DB_NAME || '';
+const dbUser = process.env.DB_USER || '';
+const dbPass = process.env.DB_PASS || '';
 
-export default async function dbConnect(dbHost: string, dbName: string, dbUser: string, dbPass: string): Promise<AccessConstructor> {
-    
-    const client = new MongoClient(`mongodb://${dbUser}:${dbPass}@${dbHost}/${dbName}`, {
-        useUnifiedTopology: true
-    });
+mongoose.connection.on('error', () => {
+    // TODO: detailed error message
+    logger.error('Mongoose connection error');
+});
 
-    await client.connect();
+// TODO: add event subscriptions to better monitor connection behavior, debug
 
-    return (Repo) => new Repo(client.db(dbName));
+export default async function databaseLoader(): Promise<void> {
+    try {
+        await mongoose.connect(`mongodb://${dbUser}:${dbPass}@${dbHost}/${dbName}`, {
+            useUnifiedTopology: true,
+            useNewUrlParser: true
+        });
+        
+    } catch (e) {
+        logger.error(e);
+
+        process.exit(1);
+    }
 }
