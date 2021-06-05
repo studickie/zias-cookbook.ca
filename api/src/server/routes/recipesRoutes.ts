@@ -12,10 +12,10 @@ import {
     recipeUpdateFormValidation,
     recipeUpdateFormValidationRules
 } from '../middleware/recipeUpdateFormValidationMiddleware';
-import { GetRecipesResponse } from '../../entities/GetRecipesResponse';
-import { GetRecipeResponse } from '../../entities/GetRecipeResponse';
-import { CreateRecipeRequest } from '../../entities/CreateRecipeRequest';
-import { CreateRecipeResponse } from '../../entities/CreateRecipeResponse';
+import { GetRecipesResponse } from '../../contracts/GetRecipesResponse';
+import { GetRecipeResponse } from '../../contracts/GetRecipeResponse';
+import { CreateRecipeRequest } from '../../contracts/CreateRecipeRequest';
+import { CreateRecipeResponse } from '../../contracts/CreateRecipeResponse';
 //import { UpdateRecipeRequest } from '../../entities/UpdateRecipeRequest';
 
 const router = express.Router();
