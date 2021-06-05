@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import { Account } from '../../models/Account';
+import { Account, AccountActivityStatus, AccountAuthMethod, AccountEmailPermissions } from '../../models/Account';
 
 /* 
     -------------------------------------------
@@ -50,22 +50,6 @@ const accountDefaultCredentialsSchema = new Schema({
     -------------------------------------------
     Account Model primary document schema
 */
-
-enum AccountEmailPermissions {
-    true = 0,
-    false = 1
-}
-
-enum AccountAuthMethod {
-    default = 0,
-    google = 1
-}
-
-enum AccountActivityStatus {
-    active = 0,
-    unverified = 1,
-    deactivated = 2
-}
 
 
 
