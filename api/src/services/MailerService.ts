@@ -1,8 +1,8 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 
-import path from 'path';
-import fs from 'fs';
+// import path from 'path';
+// import fs from 'fs';
 import logger from '../helpers/logger';
 
 const mailHost = process.env.MAIL_HOST;
@@ -30,26 +30,26 @@ class MailerService {
      *  Send an email to the app admin requesting permission to create an app account
      */
     public sendSignupRequest(emailFrom: string, requestId: string): void {
-        new Promise<string>((resolve, reject) => {
-            let replacedHtml = '';
+        // new Promise<string>((resolve, reject) => {
+        //     let replacedHtml = '';
 
-            const readable = fs.createReadStream(path.resolve(__dirname, '../../public/signupRequest.html'));
+        //     const readable = fs.createReadStream(path.resolve(__dirname, '../../public/signupRequest.html'));
 
-            readable.on('data', (chunk) => {
-                replacedHtml = replacedHtml.concat(chunk.toString().replace(/###REQUEST_ID###/g, requestId));
-            });
+        //     readable.on('data', (chunk) => {
+        //         replacedHtml = replacedHtml.concat(chunk.toString().replace(/###REQUEST_ID###/g, requestId));
+        //     });
 
-            readable.on('end', () => resolve(replacedHtml));
+        //     readable.on('end', () => resolve(replacedHtml));
 
-            readable.on('error', (err) => reject(err));
-        })
-        .then(value => {
-            // TODO: replace emailTo address with environment variable
-            console.log('send mail')
-        })
-        .catch(error => {
-            //TODO: log error
-        });
+        //     readable.on('error', (err) => reject(err));
+        // })
+        // .then(value => {
+        //     // TODO: replace emailTo address with environment variable
+        //     console.log('send mail')
+        // })
+        // .catch(error => {
+        //     //TODO: log error
+        // });
     }
 
     /**

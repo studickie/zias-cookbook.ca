@@ -34,7 +34,7 @@ const logger = createLogger({
             format: format.json()
         }),
         new transports.File({
-            filename: path.join(appRoot, 'log/debug.log'),
+            filename: path.join(appRoot, 'logs/debug.log'),
             level: 'debug',
             format: format.json()
         })
