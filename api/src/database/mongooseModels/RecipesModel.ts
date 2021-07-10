@@ -1,16 +1,31 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-import { Recipe } from '../../models/Recipe';
 import { RecipeIngredient } from '../../models/RecipeIngredient';
+import { RecipeIngredientGroup } from '../../models/RecipeIngredientGroup';
+import { Recipe } from '../../models/Recipe';
 
 export interface RecipeIngredientDocument extends Document, RecipeIngredient { }
 
 const ingredientSchema = new Schema<RecipeIngredientDocument>({
-    measurement: Number,
-    measuringUnit: String,
-    item: {
+    groupId: Number,
+    value: Number,
+    unit: String,
+    label: {
         type: String,
-        required: [true, 'Provide an item name for the ingredient']
+        required: [true, 'Ingredient label cannot be empty']
     }
+});
+
+export interface RecpieIngredientGroupDocument extends Document, RecipeIngredientGroup { }
+
+const ingredientGroupSchema = new Schema<RecpieIngredientGroupDocument>({
+    label: String,
+    groupId: {
+        type: Number,
+        required: [true, 'Ingredient groups require an Id'],
+        default: 0
+    }
+}, {
+    _id: false
 });
 
 interface RecipeDocument extends Document, Recipe {
@@ -18,7 +33,7 @@ interface RecipeDocument extends Document, Recipe {
         Re-declare the typing of properties which are mongoose sub-documents to identify 
         returned types as mongoose document 
     */
-    ingredients: Types.DocumentArray<RecipeIngredientDocument>
+    ingredients: Types.DocumentArray<RecipeIngredientDocument>;
 }
 
 interface RecipeModel extends Model<RecipeDocument> {
@@ -30,17 +45,29 @@ const recipeSchema = new Schema<RecipeDocument, RecipeModel>({
     lastUpdated: Date,
     title: {
         type: String,
-        required: [true, 'Provide a title for the recipe']
+        required: [true, 'Recipe title cannot be empty']
     },
     authoredBy: {
         type: Schema.Types.ObjectId,
         ref: 'Accounts',
-        required: [true, 'Assign an author to the recipe']
+        required: [true, 'Recipe requires an author Id']
     },
-    ingredients: [ingredientSchema],
+    ingredientGroups: {
+        type: [ingredientGroupSchema],
+        default: () => ([{}])
+    },
+    ingredients: {
+        type: [ingredientSchema],
+        default: () => ([])
+    },
+    directions: {
+        type: [String],
+        default: () => ([])
+    },
     categories: {
         type: [Number],
-        enum: [0, 1, 2, 3, 4, 5, 6]
+        enum: [0, 1, 2, 3, 4, 5, 6],
+        default: () => ([])
     }
 });
 
@@ -107,7 +134,7 @@ recipeSchema.statics.search = async function (accountId: string, filters: Record
     }, {
         authoredBy: accountId
     });
-    
+
     const result = await this.find(query);
 
     return result;

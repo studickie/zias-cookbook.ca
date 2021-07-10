@@ -13,22 +13,15 @@ import {
     recipeUpdateFormValidationRules
 } from '../middleware/recipeUpdateFormValidationMiddleware';
 import { GetRecipesResponse } from '../../contracts/GetRecipesResponse';
-import { GetRecipeResponse } from '../../contracts/GetRecipeResponse';
+//import { GetRecipeResponse } from '../../contracts/GetRecipeResponse';
 import { CreateRecipeRequest } from '../../contracts/CreateRecipeRequest';
 import { CreateRecipeResponse } from '../../contracts/CreateRecipeResponse';
-//import { UpdateRecipeRequest } from '../../entities/UpdateRecipeRequest';
+import { UpdateRecipeRequest } from '../../contracts/UpdateRecipeRequest';
 
 const router = express.Router();
-/*
-    Requests involving a recipe's ingredients are used by the recipe's author
-    to make changes to the ingredient data of a recipe.
+router.use(verifyTokenMiddleware);
 
-    A recipe is requested, in every case, by using the recipe id provided in the request 
-    url and an account id which is available in the request.
-*/
-
-/* Retrieves all recipes */
-router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res) => {
+router.get(routes.find, catchAsync(async (req, res) => {
     // TODO: add form validation for search params
     const recipes = await Recipes.search(req.accountId, req.body);
 
@@ -39,36 +32,49 @@ router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res) => {
     return res.status(200).json(responseBody);
 }));
 
-/* Retrieves a specific recipe */
-router.get(routes.findOne, verifyTokenMiddleware, catchAsync(async (req, res) => {
+router.get(routes.findOne, catchAsync(async (req, res) => {
 
     const recipe = await Recipes.findOne({
         _id: req.params.recipeId,
         authoredBy: req.accountId
     });
 
-    const responseBody: GetRecipeResponse = {
-        recipe: recipe
-    };
+    // const responseBody: GetRecipeResponse = {
+    //     recipe: recipe
+    // };
 
-    return res.status(200).json(responseBody);
+    return res.status(200).json({recipe});
 }));
 
-/* Create and insert a new recipe */
 router.post(
     routes.insert,
-    verifyTokenMiddleware,
     recipeInsertFormValidationRules(),
     recipeInsertFormValidation,
     catchAsync(async (req, res, next) => {
 
-        const { title, ingredients, categories }: CreateRecipeRequest = req.body;
+        const {
+            title,
+            categories,
+            ingredientGroups,
+            ingredients,
+            directions
+        }: CreateRecipeRequest = req.body;
 
         const createdRecipe = new Recipes({
             title: title,
             authoredBy: req.accountId,
-            ingredients: ingredients,
-            categories: categories
+            categories: [...categories],
+            ingredientGroups: ingredientGroups.map(grp => ({
+                label: grp.label,
+                groupId: grp.groupId
+            })),
+            ingredients: ingredients.map(itm => ({
+                groupId: itm.groupId,
+                label: itm.label,
+                unit: itm.unit,
+                value: itm.value
+            })),
+            directions: [...directions]
         });
 
         await createdRecipe.save();
@@ -85,18 +91,38 @@ router.post(
     })
 );
 
-/* Update an existing recipe */
 router.put(
     routes.update,
-    verifyTokenMiddleware,
     recipeUpdateFormValidationRules(),
     recipeUpdateFormValidation,
     catchAsync(async (req, res, next) => {
 
+        const {
+            title,
+            categories,
+            ingredientGroups,
+            ingredients,
+            directions
+        }: UpdateRecipeRequest = req.body;
+
         const result = await Recipes.updateOne({
             _id: req.params.recipeId,
             authoredBy: req.accountId
-        }, req.body);
+        },{
+            title: title,
+            categories: [...categories],
+            ingredientGroups: ingredientGroups.map(grp => ({
+                label: grp.label,
+                groupId: grp.groupId
+            })),
+            ingredients: ingredients.map(itm => ({
+                groupId: itm.groupId,
+                label: itm.label,
+                unit: itm.unit,
+                value: itm.value
+            })),
+            directions: [...directions]
+        });
         
         if (result.ok < 1 || result.nModified < 1) {
             return next(new ErrorBadRequest());
@@ -106,8 +132,7 @@ router.put(
     })
 );
 
-/* Delete a recipe */
-router.delete(routes.remove, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+router.delete(routes.remove, catchAsync(async (req, res, next) => {
 
     const result = await Recipes.deleteOne({
         _id: req.params.recipeId,

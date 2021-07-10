@@ -22,7 +22,6 @@ function catchAsync(fn: (req: Request, res: Response, next: NextFunction) => Pro
             });
 
             return next(err);
-
         }
     };
 }

@@ -5,6 +5,7 @@ import { ErrorBadRequest } from '../../helpers/ApplicationError';
 import jwToken from '../../helpers/jwToken';
 import { auth as routes } from './routes';
 import Accounts from '../../database/mongooseModels/AccountsModel';
+import verifyAuthCodeMiddleware from '../middleware/verifyAuthCodeMiddleware';
 //import MailerService from '../../services/MailerService';
 
 const router = express.Router();
@@ -13,9 +14,10 @@ const router = express.Router();
     Create an account with the default authentication strategy
 */
 router.post(
-    routes.signup, 
+    routes.signup,
+    verifyAuthCodeMiddleware,
     authFormValidationRules(), 
-    authFormValidationMiddleware, 
+    authFormValidationMiddleware,
     catchAsync(async (req, res, next) => {
 
     const { email, password } = req.body;
@@ -33,6 +35,7 @@ router.post(
     }
 
     // TODO: log account creation event as "info" level
+    // TODO: send email for account creation to webadmin
 
     const jwt = jwToken.generate({
         account: createdAccount._id

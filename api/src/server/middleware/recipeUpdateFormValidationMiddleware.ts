@@ -1,23 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
-import { body, ValidationChain, validationResult } from 'express-validator';
+import { body, param, ValidationChain, validationResult } from 'express-validator';
 import { ErrorBadRequest } from '../../helpers/ApplicationError';
 
 export function recipeUpdateFormValidationRules(): ValidationChain[] {
     return [
-        body().custom(args => {
-            const keys = Object.keys(args);
-
-            if (keys.length < 1) return false;
-            
-            const result = keys.filter(key => ['title', 'categories'].indexOf(key) < 0);
-
-            if (result.length > 0) return false;
-
-            return true;
-        }),
-        body('title').if(body('title').exists()).trim().notEmpty().blacklist('@#$%^_-{}[]`'),
-        // TODO: add better check on array items
-        body('categories').if(body('categories').exists()).isArray({min: 1})
+        param('recipeId').isMongoId().withMessage('Invalid target identifier'),
+        body('title').whitelist('a-zA-Z0-9\-\(\)&#\',\\s').trim().exists({ checkFalsy: true }),
+        body('categories').exists({ checkFalsy: true }).isArray(),
+        body('categories.*').toInt().isInt({ gt: -1, lt: 8 }),
+        body('directions').exists({ checkFalsy: true }).isArray(),
+        body('directions.*').whitelist('a-zA-Z0-9\-\',\\s'),
+        body('ingredients').exists({ checkFalsy: true }).isArray(),
+        body('ingredients.*.groupId').toInt().isInt(),
+        body('ingredients.*.label').whitelist('a-zA-Z0-9\-\',\\s').trim().exists({ checkFalsy: true }),
+        body('ingredients.*.value').toInt().isInt(),
+        body('ingredients.*.unit').whitelist('a-zA-Z').trim(),
+        body('ingredientGroups').exists({ checkFalsy: true }).isArray(),
+        body('ingredientGroups.*.label').whitelist('a-zA-Z0-9\-\'\\s').trim(),
+        body('ingredientGroups.*.groupId').toInt().isInt()
     ];
 }
 

@@ -10,7 +10,11 @@ class GoogleService {
     private _oauth2Client: Auth.OAuth2Client;
 
     constructor() {
-        this._oauth2Client = new google.auth.OAuth2({ clientId, clientSecret, redirectUri });
+        this._oauth2Client = new google.auth.OAuth2({ 
+            clientId, 
+            clientSecret, 
+            redirectUri 
+        });
     }
 
     private requestScopes(scope: AuthenicationScope): string[] {
@@ -30,7 +34,7 @@ class GoogleService {
 
         const authUrl = this._oauth2Client.generateAuthUrl({
             access_type: 'offline',
-            scope: scopes
+            scope: scopes,
         });
 
         return authUrl;
@@ -49,7 +53,10 @@ class GoogleService {
             auth: this._oauth2Client
         }).userinfo.get();
 
-        return { user: user.data, tokens };
+        return { 
+            user: user.data, 
+            tokens 
+        };
     }
 }
 

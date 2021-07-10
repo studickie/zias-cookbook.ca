@@ -1,4 +1,5 @@
 import { RecipeIngredient } from './RecipeIngredient';
+import { RecipeIngredientGroup } from './RecipeIngredientGroup';
 
 export enum RecipeCategories {
     breakfast,
@@ -15,6 +16,8 @@ export interface Recipe {
     lastUpdated: Date,
     title: string;
     authoredBy: string;
+    ingredientGroups: RecipeIngredientGroup[],
     ingredients: RecipeIngredient[],
+    directions: string[],
     categories: RecipeCategories[]
 }

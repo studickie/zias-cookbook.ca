@@ -104,9 +104,7 @@ accountSchema.methods.comparePassword = async function(comparative: string): Pro
             return false;
         }
 
-        const result = await bcrypt.compare(comparative, this.accountCredentials.password);
-
-        return result ? true : false;
+        return await bcrypt.compare(comparative, this.accountCredentials.password);
 
     } catch (e) {
         // TODO: log error

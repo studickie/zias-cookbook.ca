@@ -1,5 +1,6 @@
 export interface RecipeIngredient {
-    item: string;
-    measurement: number;
-    measuringUnit: string;
+    groupId: number;
+    label: string;
+    value: number;
+    unit: string;
 }

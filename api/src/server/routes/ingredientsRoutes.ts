@@ -25,8 +25,8 @@ const router = express.Router();
     url and the account's id which is added to the request by middleware.
 */
 
-/* Retrieves a recipe's ingredients */
 router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+
     const recipe = await Recipes.findOne({
         _id: req.params.recipeId,
         authoredBy: req.accountId
@@ -41,8 +41,8 @@ router.get(routes.find, verifyTokenMiddleware, catchAsync(async (req, res, next)
     });
 }));
 
-/* Retrieve a sepcific ingredient from a recipe */
 router.get(routes.findOne, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+
     const recipe = await Recipes.findOne({
         _id: `${req.params.recipeId}`,
         authoredBy: req.accountId
@@ -63,7 +63,6 @@ router.get(routes.findOne, verifyTokenMiddleware, catchAsync(async (req, res, ne
     });
 }));
 
-/* Create and insert a new ingredient on a recipe */
 router.post(
     routes.insert, 
     verifyTokenMiddleware,
@@ -72,30 +71,23 @@ router.post(
     catchAsync(async (req, res, next) => {
     
     const recipe = await Recipes.findOne({
-        _id: `${req.params.recipeId}`
+        _id: `${req.params.recipeId}`,
+        authoredBy: req.accountId
     });
 
     if (!recipe) { 
         return next(new ErrorNotFound());
     }
+
+    const { groupId, label, value, unit } = req.body;
     
-    recipe.ingredients.push({
-        item: req.body.item,
-        measurement: req.body.measurement,
-        measuringUnit: req.body.measuringUnit
-    });
+    recipe.ingredients.push({ groupId, label, value, unit });
     
     await recipe.save();
 
     return res.status(200).send();
 }));
 
-/*
-    Update a recipe's ingredient
-
-    Ingredient fields able to be updated should be limited to user-set fields
-    e.g.: 'measuringUnit', 'measurement', 'item'
-*/
 router.put(
     routes.update, 
     verifyTokenMiddleware,
@@ -129,8 +121,11 @@ router.put(
     return res.status(200).send();
 }));
 
-/* Remove a recipe's ingredient */
-router.delete(routes.remove, verifyTokenMiddleware, catchAsync(async (req, res, next) => {
+router.delete(
+    routes.remove, 
+    verifyTokenMiddleware, 
+    catchAsync(async (req, res, next) => {
+    
     const recipe = await Recipes.findOne({
         _id: req.params.recipeId,
         authoredBy: req.accountId

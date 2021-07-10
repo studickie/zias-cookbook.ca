@@ -19,7 +19,9 @@ export const oauth2 = {
     // GET
     googleUrl: `${oauth2Base}/google`,
     // POST
-    googleVerify: `${oauth2Base}/google`
+    googleVerifySignup: `${oauth2Base}/google/signup`,
+    // POST
+    googleVerifySignin: `${oauth2Base}/google/signin`
 }
 
 const recipesBase = `/recipes`;
@@ -50,4 +52,19 @@ export const ingredients = {
     update: `${ingredientsBase}/:ingredientId`,
     // DELETE
     remove: `${ingredientsBase}/:ingredientId`,
+}
+
+const directionsBase = `${recipesBase}/:recipeId/directions`;
+
+export const directions = {
+    // GET
+    find: `${directionsBase}`,
+    // GET
+    findOne: `${directionsBase}/:directionId`,
+    // POST
+    insert: `${directionsBase}`,
+    // PUT
+    update: `${directionsBase}/:directionId`,
+    // DELETE
+    remove: `${directionsBase}/:directionId`,
 }
