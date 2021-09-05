@@ -1,5 +1,3 @@
-import { RecipeIngredient } from './RecipeIngredient';
-
 export enum RecipeCategories {
     breakfast,
     lunch,
@@ -11,10 +9,10 @@ export enum RecipeCategories {
 }
 
 export interface Recipe {
-    createdOn: Date,
-    lastUpdated: Date,
+    createdOn: Date;
+    lastUpdate: Date;
     title: string;
     authoredBy: string;
-    ingredients: RecipeIngredient[],
-    categories: RecipeCategories[]
+    categories: RecipeCategories[];
+    instructions: string[];
 }

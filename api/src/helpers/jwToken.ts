@@ -1,22 +1,26 @@
 import jwt from 'jsonwebtoken';
 import logger from '../helpers/logger';
 
-const secret = process.env.SECRET;
+const secret = process.env.AUTH_SECRET;
 
-function jwToken(): {
-    generate: (data: unknown) => string;
+type JwToken = {
+    generate: (data: Record<string, unknown>) => string;
     verify: (token: string) => unknown;
-} {
+}
+
+function jwToken(): JwToken {
     try {
         if (!secret) {
             throw new Error('Unassigned env var');
         }
 
         return {
-            generate: data => (
+            generate: (data: Record<string, unknown>) => (
                 jwt.sign({
-                    exp: Math.floor(Date.now() / 1000) + (60 * 60),
-                    data: data
+                    ...{
+                        exp: Math.floor(Date.now() / 1000) + (60 * 60),
+                    },
+                    ...data
                 }, secret)
             ),
             verify: token => (

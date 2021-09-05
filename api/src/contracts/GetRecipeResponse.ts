@@ -1,5 +1,5 @@
-import { Recipe } from "../models/Recipe";
+import { RecipeResponse } from './RecipeResponse';
 
 export interface GetRecipeResponse {
-    recipe: Recipe | null;
+     recipe: RecipeResponse;
 }

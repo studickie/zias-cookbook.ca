@@ -1,8 +1,11 @@
-import { RecipeCategories } from '../models/Recipe';
-import { RecipeIngredient } from '../models/RecipeIngredient';
+import { RecipeCategories } from '../entities/Recipe';
+import { RecipeIngredient } from '../entities/RecipeIngredient';
+import { RecipeIngredientGroup } from '../entities/RecipeIngredientGroup';
 
 export interface CreateRecipeRequest {
     title: string;
     ingredients: RecipeIngredient[];
-    categories: RecipeCategories;
+    ingredientGroups: RecipeIngredientGroup[];
+    directions: string[];
+    categories: RecipeCategories[];
 }

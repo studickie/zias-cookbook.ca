@@ -8,8 +8,9 @@ export default function verifyTokenMiddleware(req: Request, res: Response, next:
     if (!authorization) {
         return next(new ErrorUnauthorized('Invalid credentials'));
     }
-
-    const decoded = jwToken.verify(authorization);
+    
+    const token = authorization.split(' ')[1];
+    const decoded = jwToken.verify(token);
 
     if (!decoded) {
         return next(new ErrorUnauthorized('Invalid credentials'));

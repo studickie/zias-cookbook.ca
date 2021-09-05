@@ -1,6 +1,6 @@
-import { RecipeCategories } from '../models/Recipe';
+import { RecipeCategories } from '../entities/Recipe';
 
 export interface GetRecipesRequest {
-    searchKeyword: string;
-    category: RecipeCategories;
+    searchKeywords: string[];
+    categories: RecipeCategories[];
 }
