@@ -1,6 +1,6 @@
-import { RecipeCategories } from '../models/Recipe';
-import { RecipeIngredient } from '../models/RecipeIngredient';
-import { RecipeIngredientGroup } from '../models/RecipeIngredientGroup';
+import { RecipeCategories } from '../entities/Recipe';
+import { RecipeIngredient } from '../entities/RecipeIngredient';
+import { RecipeIngredientGroup } from '../entities/RecipeIngredientGroup';
 
 export interface UpdateRecipeRequest {
     title: string;

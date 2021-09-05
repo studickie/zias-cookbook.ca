@@ -16,9 +16,6 @@ function catchAsync(fn: (req: Request, res: Response, next: NextFunction) => Pro
             logger.error({
                 method: req.method,
                 path: req.path,
-                name: err.name,
-                message: err.message,
-                trace: err.stack,
             });
 
             return next(err);

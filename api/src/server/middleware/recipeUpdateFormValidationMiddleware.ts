@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, param, ValidationChain, validationResult } from 'express-validator';
+import { ObjectId } from 'mongodb';
 import { ErrorBadRequest } from '../../helpers/ApplicationError';
 
 export function recipeUpdateFormValidationRules(): ValidationChain[] {
     return [
-        param('recipeId').isMongoId().withMessage('Invalid target identifier'),
+        param('recipeId').isMongoId().withMessage('Invalid target identifier').custom(arg => new ObjectId(arg)),
         body('title').whitelist('a-zA-Z0-9\-\(\)&#\',\\s').trim().exists({ checkFalsy: true }),
         body('categories').exists({ checkFalsy: true }).isArray(),
-        body('categories.*').toInt().isInt({ gt: -1, lt: 8 }),
+        body('categories.*').toInt().isInt({ gt: -1, lt: 7 }),
         body('directions').exists({ checkFalsy: true }).isArray(),
         body('directions.*').whitelist('a-zA-Z0-9\-\',\\s'),
         body('ingredients').exists({ checkFalsy: true }).isArray(),

@@ -6,7 +6,7 @@ export function recipeInsertFormValidationRules(): ValidationChain[] {
     return [
         body('title').whitelist('a-zA-Z0-9\-\(\)&#\',\\s').trim().exists({ checkFalsy: true }),
         body('categories').exists({ checkFalsy: true }).isArray(),
-        body('categories.*').toInt().isInt({ gt: -1, lt: 8 }),
+        body('categories.*').toInt().isInt({ gt: -1, lt: 7 }),
         body('directions').exists({ checkFalsy: true }).isArray(),
         body('directions.*').whitelist('a-zA-Z0-9\-\',\\s'),
         body('ingredients').exists({ checkFalsy: true }).isArray(),

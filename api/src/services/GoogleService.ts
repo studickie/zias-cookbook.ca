@@ -1,4 +1,5 @@
 import { Auth, oauth2_v2, google } from 'googleapis';
+import logger from '../helpers/logger';
 
 const clientId = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_SECRET;
@@ -6,7 +7,7 @@ const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
 type AuthenicationScope = 'basic';
 
-class GoogleService {
+export default class GoogleService {
     private _oauth2Client: Auth.OAuth2Client;
 
     constructor() {
@@ -29,12 +30,13 @@ class GoogleService {
         }
     }
 
-    public generateAuthenticationUrl(scope: AuthenicationScope): string {
+    public generateAuthenticationUrl(scope: AuthenicationScope, state: string): string {
         const scopes = this.requestScopes(scope);
 
         const authUrl = this._oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: scopes,
+            state: state
         });
 
         return authUrl;
@@ -44,8 +46,10 @@ class GoogleService {
         user: oauth2_v2.Schema$Userinfo,
         tokens: Auth.Credentials
     }> {
+        logger.debug(`GoogleService.verifyAuthenticationCode - arguments: ${code}`);
+        
         const { tokens } = await this._oauth2Client.getToken(code);
-
+        
         this._oauth2Client.setCredentials(tokens);
 
         const user = await google.oauth2({
@@ -53,11 +57,11 @@ class GoogleService {
             auth: this._oauth2Client
         }).userinfo.get();
 
+        logger.debug(`GoogleService.verifyAuthenticationCode - user: ${JSON.stringify(user)}`);
+
         return { 
             user: user.data, 
             tokens 
         };
     }
 }
-
-export default new GoogleService();

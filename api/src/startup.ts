@@ -1,10 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
-//import cors from 'cors';
-import authRoutes from './server/routes/authRoutes';
-//import ouath2Routes from './server/routes/ouath2Routes';
-import recipesRoutes from './server/routes/recipesRoutes';
-//import ingredientsRoutes from './server/routes/ingredientsRoutes';
+import accountTokensRoutes from './server/routes/webadmin/accountTokens';
+import authenticationRoutes from './server/routes/accounts/authentication';
+import googleScopesRoutes from "./server/routes/google/scopes";
 import databaseLoader from './database';
 import { ErrorNotFound, IApplicationError } from './helpers/ApplicationError';
 import logger from './helpers/logger';
@@ -18,10 +16,9 @@ async function startup() {
         app.use(helmet());
         app.use(express.json());
 
-        app.use(authRoutes);
-        //app.use(ouath2Routes);
-        app.use(recipesRoutes);
-        //app.use(ingredientsRoutes);
+        app.use(accountTokensRoutes);
+        app.use(authenticationRoutes);
+        app.use(googleScopesRoutes);
 
         app.use('*', (req, res, next) => next(new ErrorNotFound()));
 

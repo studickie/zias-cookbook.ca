@@ -44,7 +44,9 @@ abstract class ApplicationError extends Error implements IApplicationError {
             uppercase characters, with a space between.
             e.g.: ErrorNotFound to result in Not Found
         */
-        return this.constructor.name.match(/(?!Error)([A-Z][a-z]*)/g)?.join(' ') || 'Application Error';
+        //return this.constructor.name.match(/(?!Error)([A-Z][a-z]*)/g)?.join(' ') || 'Application Error';
+
+        return this.constructor.name;
     }
 }
 
